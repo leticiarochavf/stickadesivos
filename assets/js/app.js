@@ -414,6 +414,11 @@ function setupSearch() {
    ========================================================= */
 
 function setupCarousels() {
+
+  // Tolerância em px para considerar o trilho encostado na borda.
+  const EDGE = 4;
+
+
   document
     .querySelectorAll('[data-carousel]')
     .forEach(shell => {
@@ -437,59 +442,74 @@ function setupCarousels() {
       }
 
 
-      const updateButtons = () => {
-        const maxScroll =
-          track.scrollWidth -
-          track.clientWidth -
-          2;
-
-        buttons.forEach(button => {
-          button.disabled =
-            button.dataset.dir === 'prev'
-              ? track.scrollLeft <= 2
-              : track.scrollLeft >= maxScroll;
+      const slideTo = left => {
+        track.scrollTo({
+          left,
+          behavior: 'smooth'
         });
       };
 
 
       buttons.forEach(button => {
 
+        // Loop infinito: as setas nunca ficam sem destino.
+        button.disabled = false;
+
+
         button.addEventListener(
           'click',
           () => {
 
-            const direction =
+            const maxScroll =
+              track.scrollWidth -
+              track.clientWidth;
+
+
+            // Conteúdo cabe inteiro: nada para percorrer.
+            if (maxScroll <= EDGE) {
+              return;
+            }
+
+
+            const step =
+              track.clientWidth * 0.92;
+
+            const current =
+              track.scrollLeft;
+
+
+            if (
               button.dataset.dir === 'next'
-                ? 1
-                : -1;
+            ) {
 
-            track.scrollBy({
-              left:
-                track.clientWidth *
-                0.92 *
-                direction,
+              // No último slide, volta ao primeiro.
+              slideTo(
+                current >= maxScroll - EDGE
+                  ? 0
+                  : Math.min(
+                      current + step,
+                      maxScroll
+                    )
+              );
 
-              behavior: 'smooth'
-            });
+            } else {
+
+              // No primeiro slide, vai para o último.
+              slideTo(
+                current <= EDGE
+                  ? maxScroll
+                  : Math.max(
+                      current - step,
+                      0
+                    )
+              );
+
+            }
 
           }
         );
 
       });
-
-
-      track.addEventListener(
-        'scroll',
-        updateButtons,
-        { passive: true }
-      );
-
-      window.addEventListener(
-        'resize',
-        updateButtons
-      );
-
-      updateButtons();
 
     });
 }
@@ -1112,8 +1132,15 @@ function renderCart() {
   const cart =
     getCart();
 
+  const table =
+    box.closest('.cart-table');
+
 
   if (!cart.length) {
+
+    table?.classList.remove(
+      'single-item'
+    );
 
     box.innerHTML = `
       <div class="empty-state">
@@ -1160,6 +1187,24 @@ function renderCart() {
 
     return;
   }
+
+
+  /*
+   * Modo "item único": uma só linha com quantidade 1.
+   * Nesse caso o "−" não teria efeito (a quantidade
+   * já é a mínima) e o subtotal repetiria o preço
+   * unitário — então trocamos o "−" por uma lixeira
+   * e escondemos a coluna de subtotal.
+   */
+  const singleItem =
+    cart.length === 1 &&
+    Number(cart[0].qty) === 1;
+
+
+  table?.classList.toggle(
+    'single-item',
+    singleItem
+  );
 
 
   box.innerHTML =
@@ -1215,14 +1260,30 @@ function renderCart() {
             aria-label="Quantidade de pacotes"
           >
 
-            <button
-              type="button"
-              data-cart-qty="${index}"
-              data-delta="-1"
-              aria-label="Diminuir quantidade"
-            >
-              −
-            </button>
+            ${
+              singleItem
+                ? `
+                    <button
+                      class="qty-trash"
+                      type="button"
+                      data-cart-remove="${index}"
+                      aria-label="Remover ${escapeHTML(item.name)} do carrinho"
+                      title="Remover do carrinho"
+                    >
+                      ${trashIcon()}
+                    </button>
+                  `
+                : `
+                    <button
+                      type="button"
+                      data-cart-qty="${index}"
+                      data-delta="-1"
+                      aria-label="Diminuir quantidade"
+                    >
+                      −
+                    </button>
+                  `
+            }
 
             <span>
               ${item.qty}
@@ -1240,28 +1301,24 @@ function renderCart() {
           </div>
 
 
-          <div class="cart-sub">
+          ${
+            singleItem
+              ? ''
+              : `
+                  <div class="cart-sub">
 
-            <span class="mobile-label">
-              Subtotal
-            </span>
+                    <span class="mobile-label">
+                      Subtotal
+                    </span>
 
-            ${fmt(
-              item.price *
-              item.qty
-            )}
+                    ${fmt(
+                      item.price *
+                      item.qty
+                    )}
 
-          </div>
-
-
-          <button
-            class="remove"
-            type="button"
-            data-cart-remove="${index}"
-            aria-label="Remover ${escapeHTML(item.name)}"
-          >
-            ×
-          </button>
+                  </div>
+                `
+          }
 
         </div>
       `)
@@ -1286,6 +1343,10 @@ function renderCart() {
               button.dataset.cartQty
             );
 
+          /*
+           * O "−" apenas diminui: trava em 1.
+           * A remoção da linha é feita pela lixeira.
+           */
           updatedCart[index].qty =
             Math.max(
               1,
@@ -1334,6 +1395,10 @@ function renderCart() {
 
           renderCart();
 
+          showToast(
+            'Item removido do carrinho.'
+          );
+
         }
       );
 
@@ -1341,6 +1406,29 @@ function renderCart() {
 
 
   updateCartSummary();
+}
+
+
+/* Ícone de lixeira usado na remoção de item único. */
+function trashIcon() {
+  return `
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.8"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M4 7h16"/>
+      <path d="M9 7V4h6v3"/>
+      <path d="m6 7 1 13h10l1-13"/>
+      <path d="M10 11v6M14 11v6"/>
+    </svg>
+  `;
 }
 
 
@@ -1543,7 +1631,7 @@ function renderCheckout() {
   if (checkoutShipping) {
     checkoutShipping.textContent =
       cart.length
-        ? 'A calcular'
+        ? 'A combinar'
         : fmt(0);
   }
 
@@ -1578,6 +1666,23 @@ function setupCheckout() {
   if (!form) return;
 
 
+  aplicarMascaraCPF(
+    form.querySelector('#document')
+  );
+
+  aplicarMascaraTelefone(
+    form.querySelector('#phone')
+  );
+
+  aplicarMascaraCEP(
+    form.querySelector('#postalCode')
+  );
+
+  setupBuscaCEP(form);
+
+  setupParcelas(form);
+
+
   form.addEventListener(
     'submit',
     event => {
@@ -1592,12 +1697,534 @@ function setupCheckout() {
       }
 
 
+      // CPF e CEP têm validação própria, além do HTML.
+      if (
+        !validarCampoCPF(form) ||
+        !validarCampoCEP(form)
+      ) {
+        return;
+      }
+
+
       showToast(
         'Checkout demonstrativo: o pedido será finalizado pela Nuvemshop.'
       );
 
     }
   );
+}
+
+
+/* =========================================================
+   MÁSCARAS DE ENTRADA
+   ========================================================= */
+
+/*
+ * Mantém apenas dígitos e corta no comprimento máximo.
+ * Base de todas as máscaras abaixo.
+ */
+function somenteDigitos(value, max) {
+  return String(value || '')
+    .replace(/\D/g, '')
+    .slice(0, max);
+}
+
+
+/*
+ * Reaplica a máscara a cada digitação. Quando o cursor
+ * está no fim do campo, mantém ele no fim depois de
+ * reescrever o valor.
+ */
+function ligarMascara(input, formatar) {
+  if (!input) return;
+
+  const aplicar = () => {
+    const noFim =
+      input.selectionStart ===
+      input.value.length;
+
+    input.value =
+      formatar(input.value);
+
+    if (noFim) {
+      const pos = input.value.length;
+      input.setSelectionRange(pos, pos);
+    }
+  };
+
+  input.addEventListener('input', aplicar);
+
+  // Cobre autopreenchimento do navegador e colagem.
+  input.addEventListener('change', aplicar);
+
+  if (input.value) aplicar();
+}
+
+
+/* Formata CPF como 000.000.000-00. */
+function formatarCPF(value) {
+  const d = somenteDigitos(value, 11);
+
+  if (d.length <= 3) return d;
+
+  if (d.length <= 6) {
+    return d.replace(
+      /^(\d{3})(\d+)/,
+      '$1.$2'
+    );
+  }
+
+  if (d.length <= 9) {
+    return d.replace(
+      /^(\d{3})(\d{3})(\d+)/,
+      '$1.$2.$3'
+    );
+  }
+
+  return d.replace(
+    /^(\d{3})(\d{3})(\d{3})(\d+)/,
+    '$1.$2.$3-$4'
+  );
+}
+
+
+/* Aplica a máscara de CPF ao campo. */
+function aplicarMascaraCPF(input) {
+  ligarMascara(input, formatarCPF);
+}
+
+
+/* Formata telefone como (00) 00000-0000. */
+function formatarTelefone(value) {
+  const d = somenteDigitos(value, 11);
+
+  if (!d) return '';
+
+  if (d.length <= 2) {
+    return '(' + d;
+  }
+
+  if (d.length <= 7) {
+    return d.replace(
+      /^(\d{2})(\d+)/,
+      '($1) $2'
+    );
+  }
+
+  return d.replace(
+    /^(\d{2})(\d{5})(\d+)/,
+    '($1) $2-$3'
+  );
+}
+
+
+/* Aplica a máscara de telefone ao campo. */
+function aplicarMascaraTelefone(input) {
+  ligarMascara(input, formatarTelefone);
+}
+
+
+/* Formata CEP como 00000-000. */
+function formatarCEP(value) {
+  const d = somenteDigitos(value, 8);
+
+  return d.length > 5
+    ? d.replace(/^(\d{5})(\d+)/, '$1-$2')
+    : d;
+}
+
+
+/* Aplica a máscara de CEP ao campo. */
+function aplicarMascaraCEP(input) {
+  ligarMascara(input, formatarCEP);
+}
+
+
+/* =========================================================
+   MENSAGENS DE ERRO DE CAMPO
+   ========================================================= */
+
+/*
+ * Cria (uma vez) e atualiza a mensagem de erro logo
+ * abaixo do campo. Mensagem vazia limpa o erro.
+ */
+function mostrarErroCampo(input, mensagem) {
+  if (!input) return;
+
+  const field =
+    input.closest('.field') ||
+    input.parentElement;
+
+  if (!field) return;
+
+
+  let alvo =
+    field.querySelector(
+      '[data-field-message]'
+    );
+
+  if (!alvo) {
+    alvo = document.createElement('small');
+    alvo.dataset.fieldMessage = '';
+    alvo.className = 'field-error';
+    field.appendChild(alvo);
+  }
+
+  alvo.textContent = mensagem || '';
+  alvo.hidden = !mensagem;
+
+  input.setAttribute(
+    'aria-invalid',
+    mensagem ? 'true' : 'false'
+  );
+
+  // Integra com a validação nativa do formulário.
+  input.setCustomValidity(mensagem || '');
+}
+
+
+/* =========================================================
+   VALIDAÇÃO DE CPF
+   ========================================================= */
+
+/*
+ * Algoritmo oficial dos dígitos verificadores.
+ * Aceita CPF com ou sem pontuação: normaliza antes.
+ */
+function validarCPF(value) {
+  const cpf = somenteDigitos(value, 11);
+
+  if (cpf.length !== 11) return false;
+
+  // Sequências repetidas (000..., 111...) são inválidas.
+  if (/^(\d)\1{10}$/.test(cpf)) return false;
+
+
+  const digito = ate => {
+    let soma = 0;
+    let peso = ate + 1;
+
+    for (let i = 0; i < ate; i++) {
+      soma += Number(cpf[i]) * peso;
+      peso--;
+    }
+
+    const resto = (soma * 10) % 11;
+
+    return resto === 10 ? 0 : resto;
+  };
+
+
+  return (
+    digito(9) === Number(cpf[9]) &&
+    digito(10) === Number(cpf[10])
+  );
+}
+
+
+/* Valida o campo de CPF do formulário e exibe o erro. */
+function validarCampoCPF(form) {
+  const input =
+    form.querySelector('#document');
+
+  if (!input) return true;
+
+  const ok = validarCPF(input.value);
+
+  mostrarErroCampo(
+    input,
+    ok
+      ? ''
+      : 'CPF inválido. Confira os números digitados.'
+  );
+
+  if (!ok) {
+    input.reportValidity();
+  }
+
+  return ok;
+}
+
+
+/* =========================================================
+   CEP: BUSCA E PREENCHIMENTO (ViaCEP)
+   ========================================================= */
+
+/*
+ * Consulta a ViaCEP. Retorna o endereço encontrado,
+ * ou null quando o CEP não existe.
+ */
+async function buscarCEP(cep) {
+  const limpo = somenteDigitos(cep, 8);
+
+  if (limpo.length !== 8) return null;
+
+
+  const resposta =
+    await fetch(
+      'https://viacep.com.br/ws/' +
+      limpo +
+      '/json/'
+    );
+
+  if (!resposta.ok) return null;
+
+  const dados = await resposta.json();
+
+  return dados.erro ? null : dados;
+}
+
+
+/*
+ * Preenche Endereço, Bairro, Cidade e Estado.
+ * Número e Complemento ficam em branco, para o usuário.
+ */
+function preencherEndereco(form, dados) {
+  const mapa = {
+    '#address': dados.logradouro,
+    '#district': dados.bairro,
+    '#city': dados.localidade,
+    '#state': dados.uf
+  };
+
+  Object.keys(mapa).forEach(seletor => {
+
+    const campo =
+      form.querySelector(seletor);
+
+    if (campo && mapa[seletor]) {
+      campo.value = mapa[seletor];
+    }
+
+  });
+}
+
+
+/*
+ * Liga a busca ao blur do campo de CEP e registra o
+ * resultado em data-cep-valido, que o submit consulta.
+ */
+function setupBuscaCEP(form) {
+  const input =
+    form.querySelector('#postalCode');
+
+  if (!input) return;
+
+
+  const consultar = async () => {
+    const limpo =
+      somenteDigitos(input.value, 8);
+
+
+    if (!limpo) {
+      mostrarErroCampo(input, '');
+      input.dataset.cepValido = '';
+      return;
+    }
+
+
+    if (limpo.length !== 8) {
+      mostrarErroCampo(
+        input,
+        'CEP incompleto. Use o formato 00000-000.'
+      );
+      input.dataset.cepValido = 'nao';
+      return;
+    }
+
+
+    mostrarErroCampo(input, '');
+
+
+    try {
+      const dados = await buscarCEP(limpo);
+
+      if (!dados) {
+        mostrarErroCampo(
+          input,
+          'CEP não encontrado. Verifique o número digitado.'
+        );
+        input.dataset.cepValido = 'nao';
+        return;
+      }
+
+      preencherEndereco(form, dados);
+      input.dataset.cepValido = 'sim';
+
+    } catch (erro) {
+      mostrarErroCampo(
+        input,
+        'Não foi possível consultar o CEP agora. Tente novamente.'
+      );
+      input.dataset.cepValido = 'nao';
+    }
+  };
+
+
+  input.addEventListener('blur', consultar);
+
+  // Botão "Buscar CEP", caso venha a existir no HTML.
+  form
+    .querySelector('[data-buscar-cep]')
+    ?.addEventListener('click', consultar);
+}
+
+
+/* Bloqueia o envio enquanto o CEP não for válido. */
+function validarCampoCEP(form) {
+  const input =
+    form.querySelector('#postalCode');
+
+  if (!input) return true;
+
+
+  const limpo =
+    somenteDigitos(input.value, 8);
+
+  if (limpo.length !== 8) {
+    mostrarErroCampo(
+      input,
+      'CEP incompleto. Use o formato 00000-000.'
+    );
+    input.reportValidity();
+    return false;
+  }
+
+
+  if (input.dataset.cepValido === 'nao') {
+    mostrarErroCampo(
+      input,
+      'CEP não encontrado. Verifique o número digitado.'
+    );
+    input.reportValidity();
+    return false;
+  }
+
+
+  mostrarErroCampo(input, '');
+  return true;
+}
+
+
+/* =========================================================
+   PARCELAMENTO NO CARTÃO
+   ========================================================= */
+
+// Teto de parcelas e valor mínimo de cada parcela.
+const MAX_PARCELAS = 12;
+const PARCELA_MINIMA = 5;
+
+
+/*
+ * Monta as opções de parcelamento sem juros.
+ * Para quando a parcela ficaria abaixo do mínimo.
+ */
+function calcularParcelas(total) {
+  const opcoes = [];
+
+  if (!(total > 0)) return opcoes;
+
+
+  for (let n = 1; n <= MAX_PARCELAS; n++) {
+
+    const valor = total / n;
+
+    if (n > 1 && valor < PARCELA_MINIMA) break;
+
+    opcoes.push({
+      parcelas: n,
+      valor,
+      rotulo:
+        n + 'x de ' + fmt(valor) +
+        (n > 1 ? ' sem juros' : ' à vista')
+    });
+  }
+
+  return opcoes;
+}
+
+
+/*
+ * Exibe o seletor de parcelas apenas no cartão de
+ * crédito, e o esconde quando não há parcelamento.
+ */
+function setupParcelas(form) {
+  const campo =
+    document.getElementById(
+      'installmentsField'
+    );
+
+  const select =
+    document.getElementById(
+      'installments'
+    );
+
+  if (!campo || !select) return;
+
+
+  const atualizar = () => {
+
+    const cartao =
+      form.querySelector(
+        'input[name="payment"]:checked'
+      )?.value === 'card';
+
+    const opcoes =
+      calcularParcelas(
+        cartTotals().total
+      );
+
+
+    // Sem cartão ou sem parcelamento: esconde e desliga.
+    if (!cartao || opcoes.length < 2) {
+      campo.hidden = true;
+      select.disabled = true;
+      select.innerHTML = '';
+      return;
+    }
+
+
+    const escolhido = select.value;
+
+    select.innerHTML =
+      opcoes
+        .map(opcao =>
+          '<option value="' +
+          opcao.parcelas +
+          '">' +
+          escapeHTML(opcao.rotulo) +
+          '</option>'
+        )
+        .join('');
+
+    // Preserva a escolha do usuário, se ainda existir.
+    if (
+      escolhido &&
+      select.querySelector(
+        'option[value="' + escolhido + '"]'
+      )
+    ) {
+      select.value = escolhido;
+    }
+
+    campo.hidden = false;
+    select.disabled = false;
+  };
+
+
+  form
+    .querySelectorAll(
+      'input[name="payment"]'
+    )
+    .forEach(radio => {
+      radio.addEventListener(
+        'change',
+        atualizar
+      );
+    });
+
+
+  atualizar();
 }
 
 
