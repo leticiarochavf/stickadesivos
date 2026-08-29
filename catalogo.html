@@ -1,0 +1,57 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Encontre adesivos personalizados por formato e material."><title>Catálogo de adesivos | Stick Adesivos</title><link rel="stylesheet" href="assets/css/styles.css"></head><body>
+
+<div class="topbar"><div class="container">
+  <div class="topbar-item"><span class="icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class=""><path d="M13 2 4 14h7l-1 8 9-12h-7l1-8Z"/></svg></span><b>Produção rápida</b></div>
+  <div class="topbar-item"><span class="icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class=""><path d="M3 6h11v10H3z"/><path d="M14 10h4l3 3v3h-7z"/><circle cx="7" cy="18" r="2"/><circle cx="18" cy="18" r="2"/></svg></span><b>Enviamos para todo Brasil</b></div>
+  <div class="topbar-item"><span class="icon" style="color:#16ad52"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class=""><path d="M20 11.5a8 8 0 1 1-14.9 4L4 20l4.6-1.1A8 8 0 0 1 20 11.5Z"/><path d="M9.5 8.5c.7 2 2 3.4 4 4.1"/></svg></span><b>Atendimento via WhatsApp</b></div>
+</div></div>
+<header class="header">
+  <div class="container head-main">
+    <a href="index.html"><img class="logo" src="assets/img/logo.png" alt="Stick Adesivos"></a>
+    <form class="search-wrap" data-search-form>
+      <input type="search" aria-label="Buscar produtos" placeholder="O que você está procurando?">
+      <select aria-label="Categoria"><option value="">Todas as categorias</option><option value="Adesivos">Adesivos personalizados</option><option value="Lacres">Lacres de segurança</option><option value="Adesivos Prontos">Adesivos prontos</option></select>
+      <button class="search-btn" aria-label="Buscar"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class=""><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg></button>
+    </form>
+    <div class="head-actions">
+      <a class="account" href="contato.html"><span class="icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="7" r="4"/><path d="M4 21c1-5 4-7 8-7s7 2 8 7"/></svg></span><span>Atendimento<br><b>Fale com a gente</b></span></a>
+      <a class="cart-pill" href="carrinho.html"><span class="icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class=""><path d="M3 4h2l2 11h10l2-7H7"/><circle cx="9" cy="19" r="1.5"/><circle cx="17" cy="19" r="1.5"/></svg></span><span data-cart-total>R$ 0,00</span><span class="count" data-cart-count>0</span></a>
+    </div>
+  </div>
+  <nav class="nav"><div class="container">
+    <a data-nav="home" href="index.html">HOME</a>
+    <a data-nav="catalogo" class="active" href="catalogo.html">ADESIVOS PERSONALIZADOS</a>
+    <a href="catalogo.html?categoria=Lacres">LACRES DE SEGURANÇA</a>
+    <a href="catalogo.html?categoria=Adesivos%20Prontos">ADESIVOS PRONTOS</a>
+    <a href="catalogo.html?categoria=Etiquetas">PARA SEU NEGÓCIO</a>
+    <a href="sobre.html">SOBRE NÓS</a>
+    <a href="contato.html">CONTATO</a>
+  </div></nav>
+</header>
+
+<main><section class="page-hero"><div class="container"><div class="breadcrumb"><a href="index.html">Página inicial</a> › Adesivos personalizados</div><div class="page-hero-box"><div><h1>Adesivos <span>personalizados</span></h1><p>Encontre o formato e o material ideais para sua marca, embalagem ou produto.</p><div class="page-hero-features"><span>Vários formatos</span><span>Materiais selecionados</span><span>Envio de arte simples</span></div></div><img src="assets/img/hero-products.png" alt="Seleção de adesivos personalizados"></div></div></section>
+<div class="container catalog-layout">
+<button class="btn btn-outline filter-toggle" type="button" id="filterToggle" aria-expanded="false" aria-controls="filters">Filtrar produtos</button><form class="filters" id="filters"><h3>Filtrar por</h3>
+<div class="filter-group"><h4>Formato</h4><label class="check"><input type="checkbox" value="Redondo"> Redondo</label><label class="check"><input type="checkbox" value="Retangular"> Retangular</label><label class="check"><input type="checkbox" value="Quadrado"> Quadrado</label><label class="check"><input type="checkbox" value="Personalizado"> Personalizado</label></div>
+<div class="filter-group"><h4>Material</h4><label class="check"><input type="checkbox" value="Vinil"> Vinil Branco Brilho</label><label class="check"><input type="checkbox" value="Transparente"> Vinil Transparente</label><label class="check"><input type="checkbox" value="Holográfico"> Holográfico</label><label class="check"><input type="checkbox" value="Kraft"> Kraft</label></div>
+</form>
+<section class="catalog-main"><div class="catalog-tools"><div><b id="foundCount">0</b> produtos encontrados</div><label>Ordenar por <select id="catalogSort"><option value="featured">Destaques</option><option value="price-asc">Menor preço</option><option value="price-desc">Maior preço</option></select></label></div><div class="product-grid" data-product-grid></div><div class="empty-state" id="catalogEmpty" hidden><h2>Nenhum produto encontrado</h2><p>Remova alguns filtros ou faça uma nova busca.</p></div></section>
+</div>
+<div class="container catalog-benefits">
+<div class="benefits">
+  <div class="benefit"><span class="icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class=""><path d="M12 3 5 6v5c0 4.5 3 7.5 7 10 4-2.5 7-5.5 7-10V6l-7-3Z"/><path d="m9 12 2 2 4-4"/></svg></span><div><b>Materiais premium</b><small>Mais resistência e durabilidade.</small></div></div>
+  <div class="benefit"><span class="icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class=""><circle cx="12" cy="10" r="5"/><path d="m9 15-2 6 5-2 5 2-2-6"/></svg></span><div><b>Impressão de alta definição</b><small>Cores vivas e detalhes incríveis.</small></div></div>
+  <div class="benefit"><span class="icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class=""><path d="M4 13a8 8 0 0 1 16 0"/><path d="M4 13v5h3v-5H4Zm13 0v5h3v-5h-3Z"/><path d="M17 18c0 2-2 3-5 3"/></svg></span><div><b>Atendimento especializado</b><small>Do pedido à entrega, estamos com você.</small></div></div>
+</div>
+</main>
+<footer class="footer"><div class="container footer-grid">
+  <div><img class="footer-logo" src="assets/img/logo.png" alt="Stick Adesivos"><p>Adesivos personalizados para marcas, embalagens e negócios.</p><p><b>@stickadesivos</b></p></div>
+  <div><h4>LINKS RÁPIDOS</h4><a href="catalogo.html">Adesivos Personalizados</a><a href="catalogo.html?categoria=Lacres">Lacres de Segurança</a><a href="catalogo.html?categoria=Adesivos%20Prontos">Adesivos Prontos</a><a href="catalogo.html">Para seu Negócio</a><a href="contato.html">Contato</a></div>
+  <div><h4>INFORMAÇÕES</h4><a href="sobre.html">Sobre a Stick Adesivos</a><a href="produto.html">Como comprar</a><a href="contato.html">Fale com a gente</a></div>
+  <div><h4>ATENDIMENTO</h4><p>Use o formulário de contato para dúvidas sobre produtos e pedidos.</p><a href="contato.html">Abrir atendimento</a></div>
+  <div><h4>FORMAS DE PAGAMENTO</h4><p class="payment-list">VISA &nbsp; Mastercard &nbsp; Elo</p><p>PIX · Boleto</p></div>
+</div><div class="container copyright">© <span data-current-year></span> Stick Adesivos. Todos os direitos reservados.</div></footer>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script src="assets/js/products.js"></script>
+<script src="assets/js/app.js"></script>
+</body></html>

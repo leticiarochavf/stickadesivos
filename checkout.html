@@ -1,0 +1,50 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Finalização | Stick</title><link rel="stylesheet" href="assets/css/styles.css"></head><body>
+<div class="topbar"><div class="container">
+  <div class="topbar-item"><span class="icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class=""><path d="M13 2 4 14h7l-1 8 9-12h-7l1-8Z"/></svg></span><b>Produção rápida</b></div>
+  <div class="topbar-item"><span class="icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class=""><path d="M3 6h11v10H3z"/><path d="M14 10h4l3 3v3h-7z"/><circle cx="7" cy="18" r="2"/><circle cx="18" cy="18" r="2"/></svg></span><b>Enviamos para todo Brasil</b></div>
+  <div class="topbar-item"><span class="icon" style="color:#16ad52"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class=""><path d="M20 11.5a8 8 0 1 1-14.9 4L4 20l4.6-1.1A8 8 0 0 1 20 11.5Z"/><path d="M9.5 8.5c.7 2 2 3.4 4 4.1"/></svg></span><b>Atendimento via WhatsApp</b></div>
+</div></div>
+<header class="header">
+  <div class="container head-main">
+    <a href="index.html"><img class="logo" src="assets/img/logo.png" alt="Stick Adesivos"></a>
+    <form class="search-wrap" data-search-form>
+      <input type="search" aria-label="Buscar produtos" placeholder="O que você está procurando?">
+      <select aria-label="Categoria"><option value="">Todas as categorias</option><option value="Adesivos">Adesivos personalizados</option><option value="Lacres">Lacres de segurança</option><option value="Adesivos Prontos">Adesivos prontos</option></select>
+      <button class="search-btn" aria-label="Buscar"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class=""><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg></button>
+    </form>
+    <div class="head-actions">
+      <a class="account" href="contato.html"><span class="icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="7" r="4"/><path d="M4 21c1-5 4-7 8-7s7 2 8 7"/></svg></span><span>Atendimento<br><b>Fale com a gente</b></span></a>
+      <a class="cart-pill" href="carrinho.html"><span class="icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class=""><path d="M3 4h2l2 11h10l2-7H7"/><circle cx="9" cy="19" r="1.5"/><circle cx="17" cy="19" r="1.5"/></svg></span><span data-cart-total>R$ 0,00</span><span class="count" data-cart-count>0</span></a>
+    </div>
+  </div>
+  <nav class="nav"><div class="container">
+    <a data-nav="home" href="index.html">HOME</a>
+    <a data-nav="catalogo" href="catalogo.html">ADESIVOS PERSONALIZADOS</a>
+    <a href="catalogo.html?categoria=Lacres">LACRES DE SEGURANÇA</a>
+    <a href="catalogo.html?categoria=Adesivos%20Prontos">ADESIVOS PRONTOS</a>
+    <a href="catalogo.html?categoria=Etiquetas">PARA SEU NEGÓCIO</a>
+    <a href="sobre.html">SOBRE NÓS</a>
+    <a href="contato.html">CONTATO</a>
+  </div></nav>
+</header>
+
+<main class="checkout-page"><div class="container"><h1 class="sr-only">Finalização do pedido</h1><div class="checkout-stepper" aria-label="Etapas da compra"><div class="checkout-step active"><span class="dot">1</span><b>Identificação</b><div>Seus dados</div></div><div class="checkout-step"><span class="dot">2</span><b>Entrega</b><div>Endereço</div></div><div class="checkout-step"><span class="dot">3</span><b>Pagamento</b><div>Como pagar</div></div><div class="checkout-step"><span class="dot">4</span><b>Confirmação</b><div>Revisão</div></div></div>
+<form class="checkout-grid" id="checkoutForm"><section>
+<div class="form-card"><h2>1. Identificação</h2><div class="form-grid"><div class="field span2"><label for="fullName">Nome completo <span aria-hidden="true">*</span></label><input id="fullName" name="fullName" autocomplete="name" placeholder="Digite seu nome completo" required></div><div class="field span2"><label for="email">E-mail <span aria-hidden="true">*</span></label><input id="email" name="email" type="email" autocomplete="email" placeholder="seu@email.com" required></div><div class="field span2"><label for="document">CPF <span aria-hidden="true">*</span></label><input id="document" name="document" inputmode="numeric" autocomplete="off" placeholder="000.000.000-00" required></div><div class="field span2"><label for="phone">WhatsApp <span>(opcional)</span></label><input id="phone" name="phone" type="tel" autocomplete="tel" placeholder="(00) 00000-0000"></div></div></div>
+<div class="form-card"><h2>2. Endereço de entrega</h2><div class="form-grid"><div class="field"><label for="postalCode">CEP <span aria-hidden="true">*</span></label><input id="postalCode" name="postalCode" inputmode="numeric" autocomplete="postal-code" pattern="[0-9]{5}-?[0-9]{3}" placeholder="00000-000" required></div><div class="field span2"><label for="address">Endereço <span aria-hidden="true">*</span></label><input id="address" name="address" autocomplete="address-line1" placeholder="Rua ou avenida" required></div><div class="field"><label for="number">Número <span aria-hidden="true">*</span></label><input id="number" name="number" autocomplete="address-line2" placeholder="123" required></div><div class="field"><label for="complement">Complemento</label><input id="complement" name="complement" placeholder="Apto., bloco..."></div><div class="field"><label for="district">Bairro <span aria-hidden="true">*</span></label><input id="district" name="district" required></div><div class="field"><label for="city">Cidade <span aria-hidden="true">*</span></label><input id="city" name="city" autocomplete="address-level2" required></div><div class="field"><label for="state">Estado <span aria-hidden="true">*</span></label><select id="state" name="state" autocomplete="address-level1" required><option value="">UF</option><option>AC</option><option>AL</option><option>AP</option><option>AM</option><option>BA</option><option>CE</option><option>DF</option><option>ES</option><option>GO</option><option>MA</option><option>MT</option><option>MS</option><option>MG</option><option>PA</option><option>PB</option><option>PR</option><option>PE</option><option>PI</option><option>RJ</option><option>RN</option><option>RS</option><option>RO</option><option>RR</option><option>SC</option><option>SP</option><option>SE</option><option>TO</option></select></div></div></div>
+<fieldset class="form-card"><legend>3. Opção de envio</legend><div class="choice-grid"><label class="choice"><input type="radio" name="shipping" value="standard" checked><span><b>Envio para o endereço</b><small>Prazo e valor calculados pela loja integrada</small><strong>A calcular</strong></span></label></div></fieldset>
+<fieldset class="form-card"><legend>4. Forma de pagamento</legend><div class="choice-grid"><label class="choice"><input type="radio" name="payment" value="card" checked><span><b>Cartão de crédito</b><small>Condições na loja integrada</small></span></label><label class="choice"><input type="radio" name="payment" value="boleto"><span><b>Boleto bancário</b><small>À vista</small></span></label><label class="choice"><input type="radio" name="payment" value="pix"><span><b>Pix</b><small>À vista</small></span></label></div></fieldset>
+</section>
+<aside><div class="summary checkout-summary"><div class="summary-heading"><h2>Resumo do pedido</h2><a href="carrinho.html">Editar carrinho</a></div><div class="checkout-items" id="checkoutItems"></div><div class="sum-row"><span>Subtotal (<span id="checkoutCount">0 itens</span>)</span><b id="checkoutSubtotal">R$ 0,00</b></div><div class="sum-row"><span>Frete</span><b id="checkoutShipping">R$ 0,00</b></div><div class="sum-row sum-total"><span>Total</span><strong id="checkoutTotal">R$ 0,00</strong></div><button class="btn btn-blue" type="submit" id="checkoutSubmit">Finalizar pedido</button><div class="summary-note">Os dados serão processados pela plataforma de pagamento na integração final.</div></div></aside></form>
+</div></main>
+<footer class="footer"><div class="container footer-grid">
+  <div><img class="footer-logo" src="assets/img/logo.png" alt="Stick Adesivos"><p>Adesivos personalizados para marcas, embalagens e negócios.</p><p><b>@stickadesivos</b></p></div>
+  <div><h4>LINKS RÁPIDOS</h4><a href="catalogo.html">Adesivos Personalizados</a><a href="catalogo.html?categoria=Lacres">Lacres de Segurança</a><a href="catalogo.html?categoria=Adesivos%20Prontos">Adesivos Prontos</a><a href="catalogo.html">Para seu Negócio</a><a href="contato.html">Contato</a></div>
+  <div><h4>INFORMAÇÕES</h4><a href="sobre.html">Sobre a Stick Adesivos</a><a href="produto.html">Como comprar</a><a href="contato.html">Fale com a gente</a></div>
+  <div><h4>ATENDIMENTO</h4><p>Use o formulário de contato para dúvidas sobre produtos e pedidos.</p><a href="contato.html">Abrir atendimento</a></div>
+  <div><h4>FORMAS DE PAGAMENTO</h4><p class="payment-list">VISA &nbsp; Mastercard &nbsp; Elo</p><p>PIX · Boleto</p></div>
+</div><div class="container copyright">© <span data-current-year></span> Stick Adesivos. Todos os direitos reservados.</div></footer>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script src="assets/js/products.js"></script>
+<script src="assets/js/app.js"></script>
+</body></html>
