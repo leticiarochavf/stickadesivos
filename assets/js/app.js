@@ -390,15 +390,39 @@ function setupContactForm() {
   });
 }
 
+function syncCatalogHeading(activeLink) {
+  const category = new URLSearchParams(location.search).get('categoria');
+  const heading = document.querySelector('.page-hero h1');
+  if (!category || !heading || !activeLink) return;
+
+  const label = activeLink.textContent.trim().toLocaleLowerCase('pt-BR')
+    .replace(/^./, letter => letter.toLocaleUpperCase('pt-BR'));
+  const cut = label.lastIndexOf(' ');
+  heading.innerHTML = cut > 0
+    ? `${escapeHTML(label.slice(0, cut))} <span>${escapeHTML(label.slice(cut + 1))}</span>`
+    : escapeHTML(label);
+
+  const breadcrumb = document.querySelector('.breadcrumb');
+  if (breadcrumb) breadcrumb.innerHTML = `<a href="index.html">P\u00e1gina inicial</a> \u203a ${escapeHTML(label)}`;
+  document.title = `${label} | Stick Adesivos`;
+}
+
 function setupNavigation() {
   const currentPage = location.pathname.split('/').pop() || 'index.html';
+  const currentCategory = new URLSearchParams(location.search).get('categoria') || '';
   const links = [...document.querySelectorAll('.nav a')];
   links.forEach(link => link.classList.remove('active'));
-  if (currentPage === 'catalogo.html' || currentPage === 'produto.html') {
-    document.querySelector('.nav [data-nav="catalogo"]')?.classList.add('active');
-  } else {
-    links.find(link => link.getAttribute('href') === currentPage)?.classList.add('active');
+
+  let activeLink = links.find(link => {
+    const [page, query = ''] = link.getAttribute('href').split('?');
+    if (page !== currentPage) return false;
+    return (new URLSearchParams(query).get('categoria') || '') === currentCategory;
+  });
+  if (!activeLink && (currentPage === 'catalogo.html' || currentPage === 'produto.html')) {
+    activeLink = document.querySelector('.nav [data-nav="catalogo"]');
   }
+  activeLink?.classList.add('active');
+  syncCatalogHeading(activeLink);
   document.querySelectorAll('[data-current-year]').forEach(element => {
     element.textContent = new Date().getFullYear();
   });
