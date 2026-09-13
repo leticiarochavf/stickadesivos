@@ -1,40 +1,34 @@
-# Stick Adesivos — Protótipo Final V2
+# Stick Adesivos — Expo + Node
 
-Versão baseada no último protótipo visual aprovado.
+Conversão do protótipo HTML/CSS/JavaScript para um aplicativo mobile em Expo + TypeScript, com uma API Node preparada para a futura integração com a Nuvemshop.
 
-## Telas
-- Home com carrosséis
-- Catálogo
-- Produto
-- Carrinho
-- Checkout
-- Sobre
+## Telas migradas
+
+- Início com hero, benefícios, produtos em destaque e fluxo de compra
+- Catálogo com busca, categorias, materiais e ordenação
+- Detalhe do produto com tamanho, quantidade, upload da arte e CEP
+- Carrinho persistido no aparelho
+- Checkout demonstrativo
 - Contato
+- Sobre a Stick Adesivos
 
-## Direção visual
-- Fundo branco
-- Mais largura útil e componentes retangulares
-- Menos informação repetida
-- Carrosséis de produtos na Home
-- Ícones lineares e discretos
-- Azul como cor principal
-- Pink usado para destaque
-- Amarelo apenas como acento
-- Mais respiro entre blocos
+## Como executar o aplicativo
 
-## Como abrir
-1. Extraia o ZIP
-2. Abra a pasta no VS Code
-3. Rode `npm run dev`
-4. Abra `http://localhost:3000`
+```bash
+npm install
+npm run dev
+```
 
-Também funciona abrindo `index.html` diretamente para revisar o protótipo visual.
+Depois, escaneie o QR Code com o Expo Go ou pressione `a` para Android, `i` para iOS ou `w` para web.
 
-## Nuvemshop
-A pasta `api/` mantém a estrutura preparada para integração via API.
-Não exponha o token da Nuvemshop no navegador.
-O checkout atual é demonstrativo e deverá ser conectado ao fluxo oficialmente suportado pela plataforma.
+## Como executar a API Node
 
-## Referências finais
-As cinco imagens finais aprovadas ficam em:
-`assets/img/reference-final/`
+Em outro terminal:
+
+```bash
+npm run api
+```
+
+Por padrão, a API fica em `http://localhost:3000`. A rota `/api/health` funciona sem configuração. A rota `/api/products` consulta a Nuvemshop apenas quando as variáveis do `.env` estiverem preenchidas.
+
+O token da Nuvemshop deve ficar somente no servidor Node, nunca dentro do aplicativo Expo.
