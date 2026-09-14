@@ -1,4 +1,4 @@
-import { Linking } from 'react-native';
+import { Linking, Platform } from 'react-native';
 import type { CartItem } from '../context/CartContext';
 
 /*
@@ -80,6 +80,17 @@ export async function irParaCheckout(items: CartItem[]): Promise<CheckoutResulta
   const resultado = montarLinkDeCarrinho(items);
 
   if (!resultado.ok) {
+    return resultado;
+  }
+
+  /*
+   * Na web é preciso navegar na mesma aba.
+   * Linking.openURL abre uma janela nova, e navegador costuma
+   * bloquear janela nova aberta por código — o cliente clicaria
+   * em pagar e nada aconteceria.
+   */
+  if (Platform.OS === 'web' && typeof window !== 'undefined') {
+    window.location.href = resultado.url;
     return resultado;
   }
 
