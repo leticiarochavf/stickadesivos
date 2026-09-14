@@ -13,12 +13,13 @@ export function formatBRL(value: number) {
 export function ProductCard({ product }: { product: Product }) {
   const router = useRouter();
   const { addProduct } = useCart();
+  const defaultVariant = product.nuvemshopVariants?.[0];
   return <View style={styles.card}>
     <Pressable onPress={() => router.push({ pathname: '/produto/[slug]', params: { slug: product.slug } })}>
       <View style={styles.imageBox}><Image source={product.image} style={styles.image} resizeMode="contain" />{product.badge ? <Text style={styles.badge}>{product.badge}</Text> : null}</View>
       <View style={styles.copy}><Text numberOfLines={2} style={styles.name}>{product.name}</Text><Text style={styles.meta}>{product.format} · {product.material}</Text><View style={styles.rating}><Text style={styles.stars}>★★★★★</Text><Text style={styles.ratingCount}> 4,9</Text></View><Text style={styles.price}>{formatBRL(product.price)}</Text><Text style={styles.pix}>à vista no PIX</Text></View>
     </Pressable>
-    <Pressable style={styles.addButton} onPress={() => addProduct(product)}><Ionicons name="cart-outline" size={19} color={colors.blue} /></Pressable>
+    <Pressable style={styles.addButton} onPress={() => addProduct(product, 1, defaultVariant?.label ?? '5x5 cm', '', defaultVariant?.id, defaultVariant?.price)}><Ionicons name="cart-outline" size={19} color={colors.blue} /></Pressable>
   </View>;
 }
 

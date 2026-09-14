@@ -24,6 +24,9 @@ export type Product = {
   badge: string;
   image: ImageSourcePropType;
   description: string;
+  nuvemshopProductId?: number;
+  nuvemshopVariantId?: number;
+  nuvemshopVariants?: Array<{ id: number; label: string; price: number }>;
 };
 
 export const products: Product[] = [
@@ -39,6 +42,6 @@ export const products: Product[] = [
   { id: 10, slug: 'adesivo-artesanal', name: 'Adesivo Artesanal Personalizado', price: 49.9, category: 'Etiquetas', format: 'Redondo', material: 'Kraft', badge: 'ARTESANAL', image: productImages[10], description: 'Acabamento kraft com aparência artesanal para marcas autorais e produtos feitos à mão.' }
 ];
 
-export function findProduct(slug?: string) {
-  return products.find((product) => product.slug === slug) ?? products[0];
+export function findProduct(slug?: string, catalog: Product[] = products) {
+  return catalog.find((product) => product.slug === slug) ?? catalog[0] ?? products[0];
 }

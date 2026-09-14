@@ -4,12 +4,13 @@ import React from 'react';
 import { Image, ImageBackground, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { ProductCard } from '../../src/components/ProductCard';
 import { SectionTitle } from '../../src/components/SectionTitle';
-import { products } from '../../src/data/products';
+import { useProductCatalog } from '../../src/context/ProductCatalogContext';
 import { colors, spacing } from '../../src/theme';
 import { SiteHeader } from '../../src/components/SiteHeader';
 
 export default function HomeScreen() {
   const router = useRouter();
+  const { products } = useProductCatalog();
   return <View style={styles.screen}><SiteHeader /><ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
     <ImageBackground source={require('../../assets/images/hero-banner.png')} resizeMode="cover" style={styles.hero} imageStyle={styles.heroImage}>
       <View style={styles.heroCopy}><Text style={styles.heroTitle}>Adesivos personalizados para <Text style={styles.blue}>destacar</Text> sua <Text style={styles.pink}>marca.</Text></Text><Text style={styles.heroText}>Impressão de alta definição, materiais premium e acabamento impecável para o seu negócio.</Text><View style={styles.heroButtons}><Pressable style={styles.primaryButton} onPress={() => router.push({ pathname: '/produto/[slug]', params: { slug: products[0].slug } })}><Text style={styles.primaryText}>Criar meu adesivo</Text><Ionicons name="arrow-forward" size={16} color={colors.white} /></Pressable><Pressable style={styles.outlineButton} onPress={() => router.push('/(tabs)/catalogo')}><Text style={styles.outlineText}>Ver catálogo</Text></Pressable></View></View>

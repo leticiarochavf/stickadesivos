@@ -1,17 +1,197 @@
-import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
-import { SiteHeader } from '../src/components/SiteHeader';
-import { formatBRL } from '../src/components/ProductCard';
-import { useCart } from '../src/context/CartContext';
-import { colors, spacing } from '../src/theme';
+import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
+import React from "react";
+import {
+  Alert,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
+import { SiteHeader } from "../src/components/SiteHeader";
+import { formatBRL } from "../src/components/ProductCard";
+import { useCart } from "../src/context/CartContext";
+import {
+  isNuvemshopProduct,
+  openNuvemshopCart,
+} from "../src/integrations/nuvemshopBridge";
+import { colors, spacing } from "../src/theme";
 
 export default function CheckoutScreen() {
-  const router = useRouter(); const { total, clearCart } = useCart(); const [name, setName] = useState(''); const [email, setEmail] = useState(''); const [cep, setCep] = useState(''); const [address, setAddress] = useState('');
-  const finish = () => { if (!name || !email || !cep || !address) { Alert.alert('Complete seus dados', 'Preencha nome, e-mail, CEP e endereço para continuar.'); return; } Alert.alert('Pedido preparado', 'A integração de pagamento e envio será conectada nesta etapa.', [{ text: 'Voltar para a loja', onPress: () => { clearCart(); router.replace('/(tabs)'); } }]); };
-  return <View style={styles.screen}><SiteHeader /><ScrollView contentContainerStyle={styles.content}><Pressable onPress={() => router.back()}><Text style={styles.back}>‹ Voltar ao carrinho</Text></Pressable><Text style={styles.title}>Finalizar <Text style={styles.pink}>pedido</Text></Text><Text style={styles.subtitle}>Preencha seus dados para receber seu orçamento.</Text><View style={styles.card}><Text style={styles.sectionTitle}>Dados de contato</Text><Field label="Nome completo" value={name} onChangeText={setName} placeholder="Seu nome" /><Field label="E-mail" value={email} onChangeText={setEmail} placeholder="seu@email.com" /><Text style={styles.sectionTitle}>Endereço de entrega</Text><Field label="CEP" value={cep} onChangeText={setCep} placeholder="00000-000" keyboardType="number-pad" /><Field label="Endereço completo" value={address} onChangeText={setAddress} placeholder="Rua, número, bairro e cidade" /></View><View style={styles.summary}><Text style={styles.sectionTitle}>Resumo</Text><View style={styles.line}><Text style={styles.label}>Subtotal</Text><Text style={styles.value}>{formatBRL(total)}</Text></View><View style={styles.line}><Text style={styles.label}>Frete</Text><Text style={styles.value}>A calcular</Text></View><View style={styles.divider} /><View style={styles.line}><Text style={styles.total}>Total</Text><Text style={styles.totalValue}>{formatBRL(total)}</Text></View><Pressable style={styles.primary} onPress={finish}><Text style={styles.primaryText}>Continuar pedido</Text></Pressable><Text style={styles.note}>O pagamento será conectado ao fluxo oficial da loja.</Text></View></ScrollView></View>;
+  const router = useRouter();
+  const { items, total } = useCart();
+
+  const continueToCheckout = () => {
+    if (!items.length) {
+      router.replace("/(tabs)/catalogo");
+      return;
+    }
+    if (items.some((item) => !isNuvemshopProduct(item.product))) {
+      Alert.alert(
+        "Catálogo de demonstração",
+        "Para pagar, conecte os produtos reais da Nuvemshop nas variáveis de ambiente da API.",
+      );
+      return;
+    }
+    if (!openNuvemshopCart()) {
+      Alert.alert(
+        "Abra pela loja oficial",
+        "O checkout seguro fica disponível quando este site é aberto dentro da loja Stick Adesivos na Nuvemshop.",
+      );
+    }
+  };
+
+  return (
+    <View style={styles.screen}>
+      <SiteHeader />
+      <ScrollView contentContainerStyle={styles.content}>
+        <Pressable onPress={() => router.back()}>
+          <Text style={styles.back}>‹ Voltar ao carrinho</Text>
+        </Pressable>
+        <Text style={styles.title}>
+          Pagamento <Text style={styles.pink}>seguro</Text>
+        </Text>
+        <Text style={styles.subtitle}>
+          Você continuará no checkout oficial da Nuvemshop, com o Nuvem Pago.
+        </Text>
+
+        <View style={styles.securityCard}>
+          <Ionicons
+            name="shield-checkmark-outline"
+            size={28}
+            color={colors.success}
+          />
+          <View style={styles.securityCopy}>
+            <Text style={styles.securityTitle}>
+              Seus dados ficam protegidos
+            </Text>
+            <Text style={styles.securityText}>
+              Endereço, entrega e pagamento são preenchidos diretamente no
+              ambiente seguro da Nuvemshop.
+            </Text>
+          </View>
+        </View>
+
+        <View style={styles.summary}>
+          <Text style={styles.sectionTitle}>Resumo do pedido</Text>
+          <View style={styles.line}>
+            <Text style={styles.label}>Itens</Text>
+            <Text style={styles.value}>
+              {items.reduce((sum, item) => sum + item.qty, 0)}
+            </Text>
+          </View>
+          <View style={styles.line}>
+            <Text style={styles.label}>Subtotal</Text>
+            <Text style={styles.value}>{formatBRL(total)}</Text>
+          </View>
+          <View style={styles.line}>
+            <Text style={styles.label}>Frete</Text>
+            <Text style={styles.value}>Calculado no checkout</Text>
+          </View>
+          <View style={styles.divider} />
+          <View style={styles.line}>
+            <Text style={styles.total}>Total parcial</Text>
+            <Text style={styles.totalValue}>{formatBRL(total)}</Text>
+          </View>
+          <Pressable style={styles.primary} onPress={continueToCheckout}>
+            <Ionicons
+              name="lock-closed-outline"
+              size={17}
+              color={colors.white}
+            />
+            <Text style={styles.primaryText}>Ir para pagamento</Text>
+          </Pressable>
+          <Text style={styles.note}>
+            PIX, cartão e demais opções aparecem conforme a configuração ativa
+            do Nuvem Pago.
+          </Text>
+        </View>
+      </ScrollView>
+    </View>
+  );
 }
 
-function Field({ label, value, onChangeText, placeholder, keyboardType }: { label: string; value: string; onChangeText: (value: string) => void; placeholder: string; keyboardType?: 'default' | 'number-pad' }) { return <View style={styles.field}><Text style={styles.label}>{label}</Text><TextInput value={value} onChangeText={onChangeText} placeholder={placeholder} placeholderTextColor={colors.muted} keyboardType={keyboardType} style={styles.input} /></View>; }
-const styles = StyleSheet.create({ screen: { flex: 1, backgroundColor: colors.white }, content: { padding: spacing.md, paddingBottom: 35 }, back: { color: colors.blue, fontSize: 13, fontWeight: '700', marginBottom: 16 }, title: { color: colors.ink, fontSize: 29, fontWeight: '900' }, pink: { color: colors.pink }, subtitle: { color: colors.text, fontSize: 14, marginTop: 7, marginBottom: 20 }, card: { borderWidth: 1, borderColor: colors.line, borderRadius: 10, padding: spacing.md }, sectionTitle: { color: colors.ink, fontSize: 17, fontWeight: '900', marginBottom: 15 }, field: { marginBottom: 14 }, label: { color: colors.text, fontSize: 12, fontWeight: '700', marginBottom: 6 }, input: { height: 44, borderWidth: 1, borderColor: colors.line, borderRadius: 6, paddingHorizontal: 11, color: colors.ink, fontSize: 13 }, summary: { marginTop: 16, borderRadius: 10, padding: spacing.md, backgroundColor: colors.blueSoft }, line: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10 }, value: { color: colors.text, fontSize: 13 }, divider: { height: 1, backgroundColor: '#D5E1F2', marginVertical: 4 }, total: { color: colors.ink, fontSize: 16, fontWeight: '900' }, totalValue: { color: colors.blue, fontSize: 20, fontWeight: '900' }, primary: { backgroundColor: colors.blue, minHeight: 46, marginTop: 12, alignItems: 'center', justifyContent: 'center', borderRadius: 6 }, primaryText: { color: colors.white, textTransform: 'uppercase', fontWeight: '800', fontSize: 12 }, note: { color: colors.muted, fontSize: 10, textAlign: 'center', marginTop: 10 }
+const styles = StyleSheet.create({
+  screen: { flex: 1, backgroundColor: colors.white },
+  content: { padding: spacing.md, paddingBottom: 35 },
+  back: {
+    color: colors.blue,
+    fontSize: 13,
+    fontWeight: "700",
+    marginBottom: 16,
+  },
+  title: { color: colors.ink, fontSize: 29, fontWeight: "900" },
+  pink: { color: colors.pink },
+  subtitle: {
+    color: colors.text,
+    fontSize: 14,
+    lineHeight: 20,
+    marginTop: 7,
+    marginBottom: 20,
+  },
+  securityCard: {
+    borderWidth: 1,
+    borderColor: "#CFE6D7",
+    backgroundColor: "#F6FCF8",
+    borderRadius: 10,
+    padding: spacing.md,
+    flexDirection: "row",
+    gap: 12,
+    alignItems: "flex-start",
+  },
+  securityCopy: { flex: 1 },
+  securityTitle: { color: colors.ink, fontSize: 15, fontWeight: "900" },
+  securityText: {
+    color: colors.text,
+    fontSize: 12,
+    lineHeight: 18,
+    marginTop: 4,
+  },
+  summary: {
+    marginTop: 16,
+    borderRadius: 10,
+    padding: spacing.md,
+    backgroundColor: colors.blueSoft,
+  },
+  sectionTitle: {
+    color: colors.ink,
+    fontSize: 17,
+    fontWeight: "900",
+    marginBottom: 15,
+  },
+  line: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 10,
+    gap: 15,
+  },
+  label: { color: colors.text, fontSize: 13 },
+  value: { color: colors.text, fontSize: 13, textAlign: "right" },
+  divider: { height: 1, backgroundColor: "#D5E1F2", marginVertical: 4 },
+  total: { color: colors.ink, fontSize: 16, fontWeight: "900" },
+  totalValue: { color: colors.blue, fontSize: 20, fontWeight: "900" },
+  primary: {
+    backgroundColor: colors.blue,
+    minHeight: 48,
+    marginTop: 12,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 6,
+    flexDirection: "row",
+    gap: 8,
+  },
+  primaryText: {
+    color: colors.white,
+    textTransform: "uppercase",
+    fontWeight: "800",
+    fontSize: 12,
+  },
+  note: {
+    color: colors.muted,
+    fontSize: 10,
+    lineHeight: 15,
+    textAlign: "center",
+    marginTop: 10,
+  },
 });

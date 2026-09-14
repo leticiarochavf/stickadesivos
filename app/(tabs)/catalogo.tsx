@@ -3,7 +3,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useMemo, useState } from 'react';
 import { Image, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { ProductCard } from '../../src/components/ProductCard';
-import { products } from '../../src/data/products';
+import { useProductCatalog } from '../../src/context/ProductCatalogContext';
 import { colors, spacing } from '../../src/theme';
 import { SiteHeader } from '../../src/components/SiteHeader';
 
@@ -13,6 +13,7 @@ const materialOptions = ['Todos', 'Vinil Brilho', 'Vinil Fosco', 'Transparente',
 export default function CatalogScreen() {
   const params = useLocalSearchParams<{ categoria?: string; busca?: string }>();
   const router = useRouter();
+  const { products } = useProductCatalog();
   const [category, setCategory] = useState(params.categoria || 'Todos');
   const [material, setMaterial] = useState('Todos');
   const [term, setTerm] = useState(params.busca || '');
@@ -21,7 +22,7 @@ export default function CatalogScreen() {
     const normalized = term.toLowerCase().trim();
     const result = products.filter((product) => (category === 'Todos' || product.category === category) && (material === 'Todos' || product.material === material) && (!normalized || `${product.name} ${product.format} ${product.material}`.toLowerCase().includes(normalized)));
     return [...result].sort((a, b) => sort === 'asc' ? a.price - b.price : sort === 'desc' ? b.price - a.price : a.id - b.id);
-  }, [category, material, sort, term]);
+  }, [category, material, products, sort, term]);
   return <View style={styles.screen}><SiteHeader search={term} /><ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
     <View style={styles.breadcrumb}><Text style={styles.breadcrumbBlue} onPress={() => router.push('/(tabs)')}>Página inicial</Text><Text style={styles.breadcrumbSep}>›</Text><Text style={styles.breadcrumbText}>Catálogo</Text></View>
     <View style={styles.catalogHero}><View style={{ flex: 1 }}><Text style={styles.heroTitle}>Adesivos <Text style={styles.blue}>personalizados</Text></Text><Text style={styles.heroText}>Encontre o formato e o material ideais para sua marca, embalagem ou produto.</Text><View style={styles.heroTags}><Text style={styles.heroTag}>Vários formatos</Text><Text style={styles.heroTag}>Materiais selecionados</Text></View></View><Image source={require('../../assets/images/hero-products.png')} style={styles.heroImage} resizeMode="contain" /></View>

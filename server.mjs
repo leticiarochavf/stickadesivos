@@ -1,45 +1,140 @@
+import { readFileSync } from 'node:fs';
 import http from 'node:http';
+import { resolve } from 'node:path';
+
+function loadLocalEnv() {
+  try {
+    const contents = readFileSync(resolve(process.cwd(), '.env'), 'utf8');
+    contents.split(/\r?\n/).forEach((line) => {
+      const match = line.match(/^\s*([A-Z0-9_]+)\s*=\s*(.*)\s*$/i);
+      if (!match || process.env[match[1]] !== undefined) return;
+      const value = match[2].replace(/^(['"])(.*)\1$/, '$2');
+      process.env[match[1]] = value;
+    });
+  } catch {
+    // A .env file is optional; production should inject environment variables.
+  }
+}
+
+loadLocalEnv();
 
 const port = Number(process.env.PORT || 3000);
+const allowedOrigins = (process.env.APP_ORIGINS || 'http://localhost:8081,http://localhost:19006')
+  .split(',')
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
+function localized(value) {
+  if (typeof value === 'string') return value;
+  if (!value || typeof value !== 'object') return '';
+  return value.pt || value['pt-BR'] || value.es || value.en || Object.values(value).find((entry) => typeof entry === 'string') || '';
+}
+
+function plainText(value) {
+  return localized(value)
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function publicProduct(product, index) {
+  const sourceVariants = Array.isArray(product.variants) ? product.variants : [];
+  const variants = sourceVariants.map((variant, variantIndex) => {
+    const id = Number(variant?.id);
+    if (!Number.isSafeInteger(id)) return null;
+    const values = Array.isArray(variant.values)
+      ? variant.values.map(localized).filter(Boolean).join(' / ')
+      : '';
+    const price = Number(variant?.promotional_price || variant?.price || 0);
+    return {
+      id,
+      label: values || variant.sku || (sourceVariants.length === 1 ? 'Padrão' : `Opção ${variantIndex + 1}`),
+      price: Number.isFinite(price) ? price : 0
+    };
+  }).filter(Boolean);
+  const variant = variants[0];
+  const productId = Number(product.id);
+  const variantId = variant?.id;
+  if (!Number.isSafeInteger(productId) || !Number.isSafeInteger(variantId)) return null;
+
+  const category = Array.isArray(product.categories) ? localized(product.categories[0]?.name) : '';
+  const imageUrl = Array.isArray(product.images) && typeof product.images[0]?.src === 'string'
+    ? product.images[0].src
+    : undefined;
+  const name = localized(product.name) || `Produto ${index + 1}`;
+  const slug = localized(product.handle) || `produto-${productId}`;
+  const parsedPrice = variant?.price ?? 0;
+
+  return {
+    id: productId,
+    slug,
+    name,
+    price: Number.isFinite(parsedPrice) ? parsedPrice : 0,
+    category: category || 'Adesivos',
+    format: 'Personalizado',
+    material: 'Consulte as opções',
+    badge: index < 2 ? 'MAIS VENDIDO' : 'PERSONALIZÁVEL',
+    imageUrl,
+    description: plainText(product.description) || 'Produto Stick Adesivos disponível para personalização.',
+    nuvemshopProductId: productId,
+    nuvemshopVariantId: variantId,
+    nuvemshopVariants: variants
+  };
+}
+
+function sendJSON(res, status, body) {
+  res.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8' });
+  res.end(JSON.stringify(body));
+}
 
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url || '/', `http://${req.headers.host || 'localhost'}`);
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Content-Type', 'application/json; charset=utf-8');
+  const origin = req.headers.origin;
+  if (origin && allowedOrigins.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Vary', 'Origin');
+  }
+  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-  if (url.pathname === '/api/health') {
-    res.writeHead(200);
-    return res.end(JSON.stringify({ ok: true, service: 'stick-adesivos-api' }));
+  if (req.method === 'OPTIONS') {
+    res.writeHead(204);
+    return res.end();
   }
 
-  if (url.pathname === '/api/products') {
+  if (req.method === 'GET' && url.pathname === '/api/health') {
+    return sendJSON(res, 200, { ok: true, service: 'stick-adesivos-api' });
+  }
+
+  if (req.method === 'GET' && url.pathname === '/api/products') {
     const storeId = process.env.NUVEMSHOP_STORE_ID;
     const token = process.env.NUVEMSHOP_ACCESS_TOKEN;
 
     if (!storeId || !token) {
-      res.writeHead(503);
-      return res.end(JSON.stringify({ error: 'Nuvemshop não configurada. O app usa os produtos locais.' }));
+      return sendJSON(res, 503, { error: 'Nuvemshop não configurada. O app usa os produtos locais.' });
     }
 
     try {
-      const response = await fetch(`https://api.nuvemshop.com.br/v1/${storeId}/products?per_page=100`, {
+      const response = await fetch(`https://api.nuvemshop.com.br/v1/${encodeURIComponent(storeId)}/products?per_page=100`, {
         headers: {
           Authorization: `Bearer ${token}`,
-          'User-Agent': process.env.NUVEMSHOP_USER_AGENT || 'StickAdesivosApp (local@dev)',
+          'User-Agent': process.env.NUVEMSHOP_USER_AGENT || 'StickAdesivosApp (contato@stickadesivos.com.br)',
           'Content-Type': 'application/json'
         }
       });
-      const data = await response.text();
-      res.writeHead(response.status);
-      return res.end(data);
-    } catch (error) {
-      res.writeHead(500);
-      return res.end(JSON.stringify({ error: 'Falha ao consultar a Nuvemshop', detail: String(error) }));
+      if (!response.ok) return sendJSON(res, 502, { error: 'Não foi possível carregar o catálogo da Nuvemshop.' });
+
+      const data = await response.json();
+      const products = Array.isArray(data) ? data.map(publicProduct).filter(Boolean) : [];
+      return sendJSON(res, 200, { products });
+    } catch {
+      return sendJSON(res, 502, { error: 'Não foi possível carregar o catálogo da Nuvemshop.' });
     }
   }
 
-  res.writeHead(404);
-  res.end(JSON.stringify({ error: 'Rota não encontrada' }));
+  return sendJSON(res, 404, { error: 'Rota não encontrada' });
 });
 
-server.listen(port, () => console.log(`Stick Adesivos API em http://localhost:${port}`));
+server.listen(port, () => console.log(`Stick Adesivos API disponível na porta ${port}`));
