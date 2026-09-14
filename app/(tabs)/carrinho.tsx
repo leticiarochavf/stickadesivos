@@ -1,0 +1,248 @@
+import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
+import React from "react";
+import {
+  Image,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
+import { SiteHeader } from "../../src/components/SiteHeader";
+import { formatBRL } from "../../src/components/ProductCard";
+import { useCart } from "../../src/context/CartContext";
+import { colors, spacing } from "../../src/theme";
+
+export default function CartScreen() {
+  const router = useRouter();
+  const { items, total, updateQty, removeItem } = useCart();
+  return (
+    <View style={styles.screen}>
+      <SiteHeader />
+      <ScrollView
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+      >
+        <Text style={styles.title}>
+          Meu <Text style={styles.pink}>carrinho</Text>
+        </Text>
+        {!items.length ? (
+          <View style={styles.empty}>
+            <Ionicons name="cart-outline" size={48} color={colors.muted} />
+            <Text style={styles.emptyTitle}>Seu carrinho está vazio</Text>
+            <Text style={styles.emptyText}>
+              Escolha um adesivo para começar seu pedido.
+            </Text>
+            <Pressable
+              style={styles.primary}
+              onPress={() => router.push("/(tabs)/catalogo")}
+            >
+              <Text style={styles.primaryText}>Ver catálogo</Text>
+            </Pressable>
+          </View>
+        ) : (
+          <>
+            <View style={styles.items}>
+              {items.map((item) => (
+                <View key={item.key} style={styles.item}>
+                  <Image
+                    source={item.product.image}
+                    style={styles.itemImage}
+                    resizeMode="contain"
+                  />
+                  <View style={styles.itemInfo}>
+                    <Text style={styles.itemName}>{item.product.name}</Text>
+                    <Text style={styles.itemMeta}>
+                      {item.variant} · {item.product.material}
+                    </Text>
+                    <Text style={styles.itemPrice}>
+                    {formatBRL(item.unitPrice ?? item.product.price)}
+                    </Text>
+                    <View style={styles.quantity}>
+                      <Pressable
+                        onPress={() => updateQty(item.key, item.qty - 1)}
+                        style={styles.quantityButton}
+                      >
+                        <Text>−</Text>
+                      </Pressable>
+                      <Text style={styles.quantityText}>{item.qty}</Text>
+                      <Pressable
+                        onPress={() => updateQty(item.key, item.qty + 1)}
+                        style={styles.quantityButton}
+                      >
+                        <Text>+</Text>
+                      </Pressable>
+                    </View>
+                  </View>
+                  <Pressable
+                    onPress={() => removeItem(item.key)}
+                    style={styles.remove}
+                  >
+                    <Ionicons
+                      name="trash-outline"
+                      size={18}
+                      color={colors.muted}
+                    />
+                  </Pressable>
+                </View>
+              ))}
+            </View>
+            <View style={styles.summary}>
+              <Text style={styles.summaryTitle}>Resumo do pedido</Text>
+              <View style={styles.line}>
+                <Text style={styles.label}>Subtotal</Text>
+                <Text style={styles.value}>{formatBRL(total)}</Text>
+              </View>
+              <View style={styles.line}>
+                <Text style={styles.label}>Frete</Text>
+                <Text style={styles.value}>Calcular no checkout</Text>
+              </View>
+              <View style={styles.divider} />
+              <View style={styles.line}>
+                <Text style={styles.totalLabel}>Total</Text>
+                <Text style={styles.totalValue}>{formatBRL(total)}</Text>
+              </View>
+              <Pressable
+                style={styles.primary}
+                onPress={() => router.push("/checkout")}
+              >
+                <Text style={styles.primaryText}>Continuar para checkout</Text>
+                <Ionicons name="arrow-forward" size={17} color={colors.white} />
+              </Pressable>
+            </View>
+          </>
+        )}
+      </ScrollView>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  screen: { flex: 1, backgroundColor: colors.white },
+  content: { padding: spacing.md, paddingBottom: 34 },
+  title: {
+    color: colors.ink,
+    fontSize: 28,
+    fontWeight: "900",
+    marginBottom: 18,
+  },
+  pink: { color: colors.pink },
+  empty: {
+    backgroundColor: colors.soft,
+    borderRadius: 10,
+    alignItems: "center",
+    padding: 34,
+  },
+  emptyTitle: {
+    color: colors.ink,
+    fontSize: 19,
+    fontWeight: "900",
+    marginTop: 12,
+  },
+  emptyText: {
+    color: colors.muted,
+    textAlign: "center",
+    marginTop: 5,
+    marginBottom: 18,
+  },
+  items: { gap: 10 },
+  item: {
+    minHeight: 130,
+    borderWidth: 1,
+    borderColor: colors.line,
+    borderRadius: 9,
+    padding: 10,
+    flexDirection: "row",
+    position: "relative",
+  },
+  itemImage: {
+    width: 105,
+    height: 105,
+    backgroundColor: "#FCFCFD",
+    borderRadius: 7,
+  },
+  itemInfo: { flex: 1, paddingLeft: 11, paddingRight: 24 },
+  itemName: {
+    color: colors.ink,
+    fontWeight: "800",
+    fontSize: 14,
+    lineHeight: 18,
+  },
+  itemMeta: { color: colors.muted, fontSize: 11, marginTop: 4 },
+  itemPrice: {
+    color: colors.ink,
+    fontWeight: "900",
+    fontSize: 16,
+    marginTop: 6,
+  },
+  remove: { position: "absolute", top: 10, right: 10 },
+  quantity: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 8,
+    borderWidth: 1,
+    borderColor: colors.line,
+    borderRadius: 5,
+    alignSelf: "flex-start",
+    overflow: "hidden",
+  },
+  quantityButton: {
+    width: 27,
+    height: 27,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: colors.soft,
+  },
+  quantityText: {
+    width: 30,
+    textAlign: "center",
+    color: colors.ink,
+    fontWeight: "700",
+  },
+  summary: {
+    marginTop: 20,
+    padding: spacing.md,
+    backgroundColor: colors.blueSoft,
+    borderRadius: 10,
+  },
+  summaryTitle: {
+    color: colors.ink,
+    fontSize: 17,
+    fontWeight: "900",
+    marginBottom: 14,
+  },
+  line: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 9,
+  },
+  label: { color: colors.text, fontSize: 13 },
+  value: {
+    color: colors.text,
+    fontSize: 13,
+    textAlign: "right",
+    maxWidth: 180,
+  },
+  divider: { height: 1, backgroundColor: "#D6E1F3", marginVertical: 6 },
+  totalLabel: { color: colors.ink, fontWeight: "900", fontSize: 16 },
+  totalValue: { color: colors.blue, fontWeight: "900", fontSize: 20 },
+  primary: {
+    minHeight: 45,
+    marginTop: 14,
+    borderRadius: 6,
+    backgroundColor: colors.blue,
+    justifyContent: "center",
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 8,
+    paddingHorizontal: 15,
+  },
+  primaryText: {
+    color: colors.white,
+    fontWeight: "800",
+    fontSize: 12,
+    textTransform: "uppercase",
+  },
+});

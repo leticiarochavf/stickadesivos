@@ -1,0 +1,27 @@
+{
+  "expo": {
+    "name": "Stick Adesivos",
+    "slug": "stick-adesivos",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "stickadesivos",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "icon": "./assets/images/logo.png",
+    "splash": {
+      "image": "./assets/images/logo.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "plugins": ["expo-router", "expo-document-picker"],
+    "android": {
+      "package": "com.stickadesivos.app"
+    },
+    "ios": {
+      "bundleIdentifier": "com.stickadesivos.app"
+    },
+    "web": {
+      "bundler": "metro"
+    }
+  }
+}

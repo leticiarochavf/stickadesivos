@@ -1,0 +1,13 @@
+node_modules/
+.expo/
+.vercel/
+.env
+.env.*
+!.env.example
+dist/
+web-build/
+*.log
+.DS_Store
+
+.vercel
+
