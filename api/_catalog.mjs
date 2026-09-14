@@ -97,7 +97,7 @@ export async function loadNuvemshopProducts() {
           Authorization: `Bearer ${token}`,
           "User-Agent":
             process.env.NUVEMSHOP_USER_AGENT ||
-            "StickAdesivosApp (contato@stickadesivos.com.br)",
+            "StickAdesivosApp (https://www.stickadesivos.com.br)",
           "Content-Type": "application/json",
         },
       },
