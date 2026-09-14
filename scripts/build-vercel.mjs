@@ -17,7 +17,7 @@ function run(args, cwd) {
   if (result.status !== 0) process.exit(result.status || 1);
 }
 
-run(["ci"], bridge);
+run([process.env.VERCEL ? "ci" : "install"], bridge);
 run(["run", "build"], bridge);
 run(["exec", "--", "expo", "export", "--platform", "web"], root);
 
