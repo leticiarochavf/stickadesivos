@@ -43,3 +43,15 @@ Na hospedagem do frontend, configure todas as rotas (`/produto/...`, `/carrinho`
 O token da Nuvemshop fica somente no servidor. Nunca inclua `.env`, tokens ou segredos no aplicativo, no repositório ou no endereço do script.
 
 > A seleção da arte ainda é local e não envia o arquivo. Antes da venda de personalizados em produção, conecte esse campo a um armazenamento privado e registre no pedido apenas uma referência segura ao arquivo.
+
+## Hospedagem na Vercel
+
+A Vercel hospeda o frontend, as funções de API e o script NubeSDK. O domínio principal não deve ser apontado para a Vercel: ele continua na Nuvemshop, e o frontend hospedado é incorporado pela ponte. Assim, o endereço visto pelo cliente permanece `www.stickadesivos.com.br`.
+
+O comando de produção é:
+
+```bash
+npm run build:vercel
+```
+
+Na Vercel, configure `NUVEMSHOP_STORE_ID`, `NUVEMSHOP_ACCESS_TOKEN` e `NUVEMSHOP_USER_AGENT` como variáveis protegidas. O token nunca deve usar o prefixo público `EXPO_PUBLIC_`.

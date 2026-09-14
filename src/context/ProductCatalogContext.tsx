@@ -5,7 +5,7 @@ import React, {
   useMemo,
   useState,
 } from "react";
-import { ImageSourcePropType } from "react-native";
+import { ImageSourcePropType, Platform } from "react-native";
 import { Product, products as fallbackProducts } from "../data/products";
 
 type ApiProduct = Omit<Product, "image"> & { imageUrl?: string };
@@ -41,7 +41,12 @@ export function ProductCatalogProvider({
   const [remoteProducts, setRemoteProducts] = useState<Product[] | null>(null);
 
   useEffect(() => {
-    const baseURL = process.env.EXPO_PUBLIC_API_URL?.replace(/\/$/, "");
+    const configuredURL = process.env.EXPO_PUBLIC_API_URL?.replace(/\/$/, "");
+    const baseURL =
+      configuredURL ||
+      (Platform.OS === "web" && typeof window !== "undefined"
+        ? window.location.origin
+        : "");
     if (!baseURL) return;
 
     const controller = new AbortController();

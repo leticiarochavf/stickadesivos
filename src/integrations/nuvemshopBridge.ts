@@ -2,9 +2,18 @@ import { Platform } from "react-native";
 import { Product } from "../data/products";
 
 const MESSAGE_SOURCE = "stick-adesivos";
-const NUVEMSHOP_ORIGIN =
-  process.env.EXPO_PUBLIC_NUVEMSHOP_ORIGIN ||
-  "https://www.stickadesivos.com.br";
+const DEFAULT_NUVEMSHOP_ORIGINS = [
+  "https://www.stickadesivos.com.br",
+  "https://stickadesivos.com.br",
+  "https://stickadesivos.lojavirtualnuvem.com.br",
+];
+const NUVEMSHOP_ORIGINS = (
+  process.env.EXPO_PUBLIC_NUVEMSHOP_ORIGINS ||
+  DEFAULT_NUVEMSHOP_ORIGINS.join(",")
+)
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
 
 type CartProperties = Record<string, string | number | boolean>;
 
@@ -18,10 +27,25 @@ function parentWindow() {
   return window.parent;
 }
 
+export function getNuvemshopParentOrigin() {
+  if (Platform.OS === "web" && typeof document !== "undefined") {
+    try {
+      const referrerOrigin = new URL(document.referrer).origin;
+      if (NUVEMSHOP_ORIGINS.includes(referrerOrigin)) return referrerOrigin;
+    } catch {
+      // Acesso direto ao frontend não possui um referrer da loja.
+    }
+  }
+  return NUVEMSHOP_ORIGINS[0];
+}
+
 function send(message: Record<string, unknown>) {
   const parent = parentWindow();
   if (!parent) return false;
-  parent.postMessage({ source: MESSAGE_SOURCE, ...message }, NUVEMSHOP_ORIGIN);
+  parent.postMessage(
+    { source: MESSAGE_SOURCE, ...message },
+    getNuvemshopParentOrigin(),
+  );
   return true;
 }
 
