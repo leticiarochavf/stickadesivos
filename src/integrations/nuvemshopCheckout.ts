@@ -23,12 +23,16 @@ import type { CartItem } from '../context/CartContext';
  */
 
 /*
- * Endereço da loja Nuvemshop.
+ * Endereço da LOJA Nuvemshop — não é o endereço do site.
  *
- * ATENÇÃO: este é o endereço da LOJA, não o do site. Se um dia o
- * site passar a usar www.stickadesivos.com.br, a loja precisará
- * de outro endereço (por exemplo loja.stickadesivos.com.br) e
- * este valor tem que ser atualizado junto.
+ * Quando o domínio principal passar a servir o site (ver
+ * MIGRACAO-DOMINIO.md), a loja muda para um subdomínio e este
+ * valor precisa mudar junto, ANTES de mexer no DNS:
+ *
+ *   'https://loja.stickadesivos.com.br'
+ *
+ * Se o DNS mudar primeiro, o endereço de carrinho abaixo deixa
+ * de existir e o botão de pagar para de funcionar.
  */
 export const STORE_URL = 'https://www.stickadesivos.com.br';
 
