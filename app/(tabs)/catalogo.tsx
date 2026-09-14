@@ -7,7 +7,7 @@ import { useProductCatalog } from '../../src/context/ProductCatalogContext';
 import { colors, spacing } from '../../src/theme';
 import { SiteHeader } from '../../src/components/SiteHeader';
 
-const categoryOptions = ['Todos', 'Adesivos', 'Lacres', 'Adesivos Prontos', 'Etiquetas'];
+const categoryOptions = ['Todos', 'Adesivos', 'Lacres', 'Etiquetas'];
 const materialOptions = ['Todos', 'Vinil Brilho', 'Vinil Fosco', 'Transparente', 'Holográfico', 'Kraft', 'Void'];
 
 export default function CatalogScreen() {

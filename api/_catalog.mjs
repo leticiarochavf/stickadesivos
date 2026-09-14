@@ -94,7 +94,10 @@ export async function loadNuvemshopProducts() {
       `https://api.nuvemshop.com.br/2025-03/${encodeURIComponent(storeId)}/products?per_page=100`,
       {
         headers: {
-          Authorization: `Bearer ${token}`,
+          // A Nuvemshop usa o cabeçalho "Authentication", com "bearer"
+          // minúsculo. Com "Authorization: Bearer" a API responde
+          // 401 Invalid access token.
+          Authentication: `bearer ${token}`,
           "User-Agent":
             process.env.NUVEMSHOP_USER_AGENT ||
             "StickAdesivosApp (https://www.stickadesivos.com.br)",
@@ -103,10 +106,20 @@ export async function loadNuvemshopProducts() {
       },
     );
     if (!response.ok) {
-      return {
-        status: 502,
-        body: { error: "Não foi possível carregar o catálogo da Nuvemshop." },
-      };
+      // O detalhe fica no log do servidor, nunca na resposta pública,
+      // para não vazar nada sobre a configuração da loja.
+      const detalhe = await response.text().catch(() => "");
+      console.error(
+        `[nuvemshop] products falhou: HTTP ${response.status}`,
+        detalhe.slice(0, 300),
+      );
+
+      const motivo =
+        response.status === 401
+          ? "Token inválido ou sem permissão. Confira NUVEMSHOP_ACCESS_TOKEN e os escopos do app."
+          : "Não foi possível carregar o catálogo da Nuvemshop.";
+
+      return { status: 502, body: { error: motivo } };
     }
     const data = await response.json();
     const products = Array.isArray(data)

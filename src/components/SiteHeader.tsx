@@ -33,7 +33,11 @@ export function SiteHeader({ search = '' }: { search?: string }) {
         <NavItem label="Início" onPress={() => router.push('/(tabs)')} />
         <NavItem label="Personalizados" onPress={() => router.push({ pathname: '/(tabs)/catalogo', params: { categoria: 'Adesivos' } })} />
         <NavItem label="Lacres" onPress={() => router.push({ pathname: '/(tabs)/catalogo', params: { categoria: 'Lacres' } })} />
-        <NavItem label="Prontos" onPress={() => router.push({ pathname: '/(tabs)/catalogo', params: { categoria: 'Adesivos Prontos' } })} />
+        <NavItem label="Etiquetas" onPress={() => router.push({ pathname: '/(tabs)/catalogo', params: { categoria: 'Etiquetas' } })} />
+        <NavItem label="Automotivo" onPress={() => router.push('/automotivo')} />
+        <NavItem label="Serviços" onPress={() => router.push('/servicos')} />
+        <NavItem label="Orçamento" onPress={() => router.push('/orcamento')} />
+        <NavItem label="Dúvidas" onPress={() => router.push('/faq')} />
         <NavItem label="Sobre nós" onPress={() => router.push('/sobre')} />
       </ScrollView>
     </View>

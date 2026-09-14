@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs';
 import http from 'node:http';
 import { resolve } from 'node:path';
+import { lerCredenciaisApp, paginaResultado, trocarCodePorToken } from '../api/_oauth.mjs';
 
 function loadLocalEnv() {
   try {
@@ -119,7 +120,9 @@ const server = http.createServer(async (req, res) => {
     try {
       const response = await fetch(`https://api.nuvemshop.com.br/2025-03/${encodeURIComponent(storeId)}/products?per_page=100`, {
         headers: {
-          Authorization: `Bearer ${token}`,
+          // Cabeçalho da Nuvemshop: "Authentication", com "bearer"
+          // minúsculo. "Authorization: Bearer" devolve 401.
+          Authentication: `bearer ${token}`,
           'User-Agent': process.env.NUVEMSHOP_USER_AGENT || 'StickAdesivosApp (https://www.stickadesivos.com.br)',
           'Content-Type': 'application/json'
         }
@@ -132,6 +135,16 @@ const server = http.createServer(async (req, res) => {
     } catch {
       return sendJSON(res, 502, { error: 'Não foi possível carregar o catálogo da Nuvemshop.' });
     }
+  }
+
+  if (req.method === 'GET' && url.pathname === '/api/oauth-callback') {
+    const resultado = await trocarCodePorToken(url.searchParams.get('code'));
+    const { ambienteLocal } = lerCredenciaisApp();
+    res.writeHead(resultado.erro ? resultado.status : 200, {
+      'Content-Type': 'text/html; charset=utf-8',
+      'Cache-Control': 'no-store'
+    });
+    return res.end(paginaResultado(resultado, ambienteLocal));
   }
 
   return sendJSON(res, 404, { error: 'Rota não encontrada' });
