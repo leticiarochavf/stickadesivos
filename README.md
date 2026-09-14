@@ -7,7 +7,7 @@ Frontend da Stick Adesivos em Expo/React Native Web e TypeScript, mantendo o vis
 O projeto não recebe nem armazena dados de cartão. O frontend envia os produtos ao carrinho da Nuvemshop por uma integração NubeSDK; em seguida, a pessoa conclui a compra no checkout oficial, com as opções habilitadas no Nuvem Pago.
 
 - `app/` e `src/`: experiência visual existente em Expo/TypeScript.
-- `server.mjs`: consulta os produtos reais sem expor o token no navegador.
+- `scripts/local-server.mjs`: consulta os produtos reais no desenvolvimento local sem expor o token no navegador.
 - `nuvemshop-storefront/`: script NubeSDK que conecta o frontend ao carrinho nativo.
 
 ## Desenvolvimento local

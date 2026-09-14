@@ -12,7 +12,7 @@ function loadLocalEnv() {
       process.env[match[1]] = value;
     });
   } catch {
-    // A .env file is optional; production should inject environment variables.
+    // O .env é opcional; em produção, use variáveis protegidas da hospedagem.
   }
 }
 

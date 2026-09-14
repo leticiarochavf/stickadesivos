@@ -6,7 +6,7 @@
   "scripts": {
     "start": "expo start",
     "dev": "expo start",
-    "api": "node server.mjs",
+    "api": "node scripts/local-server.mjs",
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
