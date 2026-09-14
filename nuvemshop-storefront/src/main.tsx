@@ -10,10 +10,11 @@ import type {
 import { MESSAGE_SOURCE, parseStorefrontCommand } from "./messages";
 
 const IFRAME_ID = "stick-adesivos-storefront";
+const DEFAULT_FRONTEND_URL =
+	"https://stickadesivos-git-deploy-20260913.vercel.app";
 
 function getFrontendURL(): SecurityURL | null {
-	const configuredURL = getScriptParam("frontend_url");
-	if (!configuredURL) return null;
+	const configuredURL = getScriptParam("frontend_url") || DEFAULT_FRONTEND_URL;
 
 	try {
 		const url = new URL(configuredURL);

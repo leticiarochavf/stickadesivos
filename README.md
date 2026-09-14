@@ -36,7 +36,7 @@ npm run test
 npm run build
 ```
 
-O arquivo gerado em `nuvemshop-storefront/dist/main.min.js` deve ser publicado por HTTPS e cadastrado como script NubeSDK. A URL do script deve receber `frontend_url=https://...` apontando para a versão web publicada deste projeto.
+O arquivo gerado em `nuvemshop-storefront/dist/main.min.js` deve ser enviado pelo Portal de Parceiros como script NubeSDK, validado primeiro em uma loja demo e então ativado. Por padrão, ele incorpora a versão web publicada deste projeto; o parâmetro opcional `frontend_url=https://...` permite trocar a URL em uma instalação de teste.
 
 Na hospedagem do frontend, configure todas as rotas (`/produto/...`, `/carrinho`, `/checkout`) para retornarem `index.html`, pois a navegação web funciona como uma aplicação de página única.
 

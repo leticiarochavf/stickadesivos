@@ -117,7 +117,7 @@ const server = http.createServer(async (req, res) => {
     }
 
     try {
-      const response = await fetch(`https://api.nuvemshop.com.br/v1/${encodeURIComponent(storeId)}/products?per_page=100`, {
+      const response = await fetch(`https://api.nuvemshop.com.br/2025-03/${encodeURIComponent(storeId)}/products?per_page=100`, {
         headers: {
           Authorization: `Bearer ${token}`,
           'User-Agent': process.env.NUVEMSHOP_USER_AGENT || 'StickAdesivosApp (contato@stickadesivos.com.br)',
