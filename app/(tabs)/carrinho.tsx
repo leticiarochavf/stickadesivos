@@ -12,11 +12,31 @@ import {
 import { SiteHeader } from "../../src/components/SiteHeader";
 import { formatBRL } from "../../src/components/ProductCard";
 import { useCart } from "../../src/context/CartContext";
+import { irParaCheckout } from "../../src/integrations/nuvemshopCheckout";
 import { colors, spacing } from "../../src/theme";
 
 export default function CartScreen() {
   const router = useRouter();
   const { items, total, updateQty, removeItem } = useCart();
+  const [erro, setErro] = React.useState("");
+
+  /*
+   * O pagamento acontece no checkout da loja Nuvemshop, que já
+   * recebe os itens pelo endereço do carrinho. Aqui no site não
+   * passa nenhum dado de cartão.
+   */
+  const pagar = async () => {
+    setErro("");
+    const resultado = await irParaCheckout(items);
+
+    if (!resultado.ok) {
+      setErro(
+        resultado.motivo === "carrinho-vazio"
+          ? "Seu carrinho está vazio."
+          : `O produto "${resultado.itemSemVariante}" ainda não está ligado à loja. Fale com a gente pelo WhatsApp para fechar este pedido.`,
+      );
+    }
+  };
   return (
     <View style={styles.screen}>
       <SiteHeader />
@@ -96,20 +116,25 @@ export default function CartScreen() {
               </View>
               <View style={styles.line}>
                 <Text style={styles.label}>Frete</Text>
-                <Text style={styles.value}>Calcular no checkout</Text>
+                <Text style={styles.value}>Calculado na finalização</Text>
               </View>
               <View style={styles.divider} />
               <View style={styles.line}>
                 <Text style={styles.totalLabel}>Total</Text>
                 <Text style={styles.totalValue}>{formatBRL(total)}</Text>
               </View>
-              <Pressable
-                style={styles.primary}
-                onPress={() => router.push("/checkout")}
-              >
-                <Text style={styles.primaryText}>Continuar para checkout</Text>
+
+              {erro ? <Text style={styles.erro}>{erro}</Text> : null}
+
+              <Pressable style={styles.primary} onPress={pagar}>
+                <Text style={styles.primaryText}>Finalizar e pagar</Text>
                 <Ionicons name="arrow-forward" size={17} color={colors.white} />
               </Pressable>
+
+              <Text style={styles.nota}>
+                O pagamento é concluído no ambiente seguro da loja, com Pix,
+                boleto ou cartão. Seus itens vão junto.
+              </Text>
             </View>
           </>
         )}
@@ -119,6 +144,22 @@ export default function CartScreen() {
 }
 
 const styles = StyleSheet.create({
+  erro: {
+    marginTop: 12,
+    padding: 11,
+    borderRadius: 7,
+    backgroundColor: '#FDECEF',
+    color: '#A01035',
+    fontSize: 13,
+    lineHeight: 19,
+  },
+  nota: {
+    marginTop: 10,
+    color: colors.muted,
+    fontSize: 12,
+    lineHeight: 17,
+    textAlign: 'center',
+  },
   screen: { flex: 1, backgroundColor: colors.white },
   content: { padding: spacing.md, paddingBottom: 34 },
   title: {

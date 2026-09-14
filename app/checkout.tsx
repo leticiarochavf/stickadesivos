@@ -1,43 +1,37 @@
-import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import React from "react";
-import {
-  Alert,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import React, { useState } from "react";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SiteHeader } from "../src/components/SiteHeader";
-import { formatBRL } from "../src/components/ProductCard";
 import { useCart } from "../src/context/CartContext";
-import {
-  isNuvemshopProduct,
-  openNuvemshopCart,
-} from "../src/integrations/nuvemshopBridge";
+import { irParaCheckout } from "../src/integrations/nuvemshopCheckout";
 import { colors, spacing } from "../src/theme";
+
+/*
+ * Esta tela deixou de coletar dados de pagamento.
+ *
+ * O pagamento é concluído no checkout da loja Nuvemshop, que é
+ * quem trata endereço, frete, Pix, boleto e cartão. Pedir esses
+ * dados aqui seria digitação repetida e guardaria informação
+ * sensível sem necessidade.
+ *
+ * A rota continua existindo para não quebrar link antigo: ela
+ * apenas leva a pessoa para a finalização.
+ */
 
 export default function CheckoutScreen() {
   const router = useRouter();
   const { items, total } = useCart();
+  const [erro, setErro] = useState("");
 
-  const continueToCheckout = () => {
-    if (!items.length) {
-      router.replace("/(tabs)/catalogo");
-      return;
-    }
-    if (items.some((item) => !isNuvemshopProduct(item.product))) {
-      Alert.alert(
-        "Catálogo de demonstração",
-        "Para pagar, conecte os produtos reais da Nuvemshop nas variáveis de ambiente da API.",
-      );
-      return;
-    }
-    if (!openNuvemshopCart()) {
-      Alert.alert(
-        "Abra pela loja oficial",
-        "O checkout seguro fica disponível quando este site é aberto dentro da loja Stick Adesivos na Nuvemshop.",
+  const finalizar = async () => {
+    setErro("");
+    const resultado = await irParaCheckout(items);
+
+    if (!resultado.ok) {
+      setErro(
+        resultado.motivo === "carrinho-vazio"
+          ? "Seu carrinho está vazio."
+          : `O produto "${resultado.itemSemVariante}" ainda não está ligado à loja. Fale com a gente pelo WhatsApp.`,
       );
     }
   };
@@ -46,67 +40,42 @@ export default function CheckoutScreen() {
     <View style={styles.screen}>
       <SiteHeader />
       <ScrollView contentContainerStyle={styles.content}>
-        <Pressable onPress={() => router.back()}>
-          <Text style={styles.back}>‹ Voltar ao carrinho</Text>
-        </Pressable>
-        <Text style={styles.title}>
-          Pagamento <Text style={styles.pink}>seguro</Text>
-        </Text>
-        <Text style={styles.subtitle}>
-          Você continuará no checkout oficial da Nuvemshop, com o Nuvem Pago.
+        <Text style={styles.title}>Finalizar pedido</Text>
+
+        <Text style={styles.lead}>
+          O pagamento é concluído no ambiente seguro da loja, com Pix, boleto ou
+          cartão. Os itens do seu carrinho vão junto, e o endereço e o frete são
+          informados lá.
         </Text>
 
-        <View style={styles.securityCard}>
-          <Ionicons
-            name="shield-checkmark-outline"
-            size={28}
-            color={colors.success}
-          />
-          <View style={styles.securityCopy}>
-            <Text style={styles.securityTitle}>
-              Seus dados ficam protegidos
-            </Text>
-            <Text style={styles.securityText}>
-              Endereço, entrega e pagamento são preenchidos diretamente no
-              ambiente seguro da Nuvemshop.
-            </Text>
-          </View>
-        </View>
-
-        <View style={styles.summary}>
-          <Text style={styles.sectionTitle}>Resumo do pedido</Text>
+        <View style={styles.box}>
           <View style={styles.line}>
             <Text style={styles.label}>Itens</Text>
-            <Text style={styles.value}>
-              {items.reduce((sum, item) => sum + item.qty, 0)}
-            </Text>
+            <Text style={styles.value}>{items.length}</Text>
           </View>
           <View style={styles.line}>
             <Text style={styles.label}>Subtotal</Text>
-            <Text style={styles.value}>{formatBRL(total)}</Text>
+            <Text style={styles.value}>
+              {total.toLocaleString("pt-BR", {
+                style: "currency",
+                currency: "BRL",
+              })}
+            </Text>
           </View>
-          <View style={styles.line}>
-            <Text style={styles.label}>Frete</Text>
-            <Text style={styles.value}>Calculado no checkout</Text>
-          </View>
-          <View style={styles.divider} />
-          <View style={styles.line}>
-            <Text style={styles.total}>Total parcial</Text>
-            <Text style={styles.totalValue}>{formatBRL(total)}</Text>
-          </View>
-          <Pressable style={styles.primary} onPress={continueToCheckout}>
-            <Ionicons
-              name="lock-closed-outline"
-              size={17}
-              color={colors.white}
-            />
-            <Text style={styles.primaryText}>Ir para pagamento</Text>
-          </Pressable>
-          <Text style={styles.note}>
-            PIX, cartão e demais opções aparecem conforme a configuração ativa
-            do Nuvem Pago.
-          </Text>
         </View>
+
+        {erro ? <Text style={styles.erro}>{erro}</Text> : null}
+
+        <Pressable style={styles.primary} onPress={finalizar}>
+          <Text style={styles.primaryText}>Ir para o pagamento</Text>
+        </Pressable>
+
+        <Pressable
+          style={styles.ghost}
+          onPress={() => router.push("/(tabs)/carrinho")}
+        >
+          <Text style={styles.ghostText}>Voltar ao carrinho</Text>
+        </Pressable>
       </ScrollView>
     </View>
   );
@@ -114,84 +83,47 @@ export default function CheckoutScreen() {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.white },
-  content: { padding: spacing.md, paddingBottom: 35 },
-  back: {
-    color: colors.blue,
-    fontSize: 13,
-    fontWeight: "700",
-    marginBottom: 16,
-  },
-  title: { color: colors.ink, fontSize: 29, fontWeight: "900" },
-  pink: { color: colors.pink },
-  subtitle: {
-    color: colors.text,
-    fontSize: 14,
-    lineHeight: 20,
-    marginTop: 7,
-    marginBottom: 20,
-  },
-  securityCard: {
+  content: { padding: spacing.md, paddingBottom: 40, gap: 14 },
+  title: { color: colors.ink, fontSize: 26, fontWeight: "900" },
+  lead: { color: colors.text, fontSize: 14, lineHeight: 21 },
+  box: {
     borderWidth: 1,
-    borderColor: "#CFE6D7",
-    backgroundColor: "#F6FCF8",
+    borderColor: colors.line,
     borderRadius: 10,
     padding: spacing.md,
-    flexDirection: "row",
-    gap: 12,
-    alignItems: "flex-start",
+    gap: 8,
   },
-  securityCopy: { flex: 1 },
-  securityTitle: { color: colors.ink, fontSize: 15, fontWeight: "900" },
-  securityText: {
-    color: colors.text,
-    fontSize: 12,
-    lineHeight: 18,
-    marginTop: 4,
+  line: { flexDirection: "row", justifyContent: "space-between" },
+  label: { color: colors.muted, fontSize: 13 },
+  value: { color: colors.ink, fontSize: 14, fontWeight: "800" },
+  erro: {
+    padding: 11,
+    borderRadius: 7,
+    backgroundColor: "#FDECEF",
+    color: "#A01035",
+    fontSize: 13,
+    lineHeight: 19,
   },
-  summary: {
-    marginTop: 16,
-    borderRadius: 10,
-    padding: spacing.md,
-    backgroundColor: colors.blueSoft,
-  },
-  sectionTitle: {
-    color: colors.ink,
-    fontSize: 17,
-    fontWeight: "900",
-    marginBottom: 15,
-  },
-  line: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 10,
-    gap: 15,
-  },
-  label: { color: colors.text, fontSize: 13 },
-  value: { color: colors.text, fontSize: 13, textAlign: "right" },
-  divider: { height: 1, backgroundColor: "#D5E1F2", marginVertical: 4 },
-  total: { color: colors.ink, fontSize: 16, fontWeight: "900" },
-  totalValue: { color: colors.blue, fontSize: 20, fontWeight: "900" },
   primary: {
     backgroundColor: colors.blue,
     minHeight: 48,
-    marginTop: 12,
+    borderRadius: 7,
     alignItems: "center",
     justifyContent: "center",
-    borderRadius: 6,
-    flexDirection: "row",
-    gap: 8,
   },
   primaryText: {
     color: colors.white,
-    textTransform: "uppercase",
     fontWeight: "800",
-    fontSize: 12,
+    fontSize: 13,
+    textTransform: "uppercase",
   },
-  note: {
-    color: colors.muted,
-    fontSize: 10,
-    lineHeight: 15,
-    textAlign: "center",
-    marginTop: 10,
+  ghost: {
+    minHeight: 44,
+    borderRadius: 7,
+    borderWidth: 2,
+    borderColor: colors.blue,
+    alignItems: "center",
+    justifyContent: "center",
   },
+  ghostText: { color: colors.blue, fontWeight: "800", fontSize: 13 },
 });
