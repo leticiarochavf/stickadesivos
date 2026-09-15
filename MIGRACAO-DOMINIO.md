@@ -71,6 +71,14 @@ Commit e push. O deploy sai sozinho.
 
 > Este passo tem que vir **antes** do passo 5. Depois que o `www` apontar para a Vercel, o endereço antigo de carrinho deixa de existir, e o botão de pagar quebraria.
 
+### 4.1 Trocar o domínio Principal da loja
+
+No painel da loja, em **Configurações › Domínios**, o domínio marcado como **Principal** hoje é `stickadesivos.com.br`. Por causa disso a Nuvemshop redireciona qualquer acesso da loja para ele — inclusive o endereço de carrinho.
+
+Antes de mexer no DNS, marcar como Principal o `loja.stickadesivos.com.br` (ou, se ele ainda não estiver vinculado, o `stickadesivos.lojavirtualnuvem.com.br`).
+
+> Se isso não for feito, no dia da virada a loja vai redirecionar o checkout para `stickadesivos.com.br`, que a essa altura já será o site — e o cliente cai no site em vez de pagar.
+
 ### 5. Apontar o domínio para a Vercel
 
 No Registro.br, trocar os apontamentos atuais:
