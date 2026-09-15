@@ -8,7 +8,7 @@ import {
   PageIntro,
   Paragraph
 } from '../src/components/PageBlocks';
-import { colors, spacing } from '../src/theme';
+import { colors, layout, spacing } from '../src/theme';
 
 /*
  * Políticas da loja.
@@ -128,7 +128,7 @@ export default function PoliciesScreen() {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.white },
-  content: { padding: spacing.md, paddingBottom: 48, gap: spacing.md },
+  content: { width: '100%', maxWidth: layout.readingWidth, alignSelf: 'center', padding: spacing.md, paddingBottom: 48, gap: spacing.md },
   confirmar: {
     backgroundColor: '#FDF3D6',
     borderRadius: 7,

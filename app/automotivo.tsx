@@ -206,7 +206,7 @@ export default function AutomotiveScreen() {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.white },
-  content: { padding: spacing.md, paddingBottom: 48, gap: spacing.md },
+  content: { width: '100%', maxWidth: 900, alignSelf: 'center', padding: spacing.md, paddingBottom: 48, gap: spacing.md },
   aviso: {
     backgroundColor: '#FFF8E5',
     borderWidth: 1,

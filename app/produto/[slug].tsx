@@ -10,6 +10,7 @@ import {
   StyleSheet,
   Text,
   TextInput,
+  useWindowDimensions,
   View,
 } from "react-native";
 import { SiteHeader } from "../../src/components/SiteHeader";
@@ -17,13 +18,15 @@ import { formatBRL, ProductCard } from "../../src/components/ProductCard";
 import { findProduct } from "../../src/data/products";
 import { useProductCatalog } from "../../src/context/ProductCatalogContext";
 import { useCart } from "../../src/context/CartContext";
-import { colors, spacing } from "../../src/theme";
+import { colors, layout, spacing } from "../../src/theme";
 
 const sizes = ["3x3 cm", "5x5 cm", "7x7 cm", "10x10 cm", "Personalizado"];
 
 export default function ProductScreen() {
   const params = useLocalSearchParams<{ slug?: string }>();
   const router = useRouter();
+  const { width } = useWindowDimensions();
+  const isDesktop = width >= layout.desktopBreakpoint;
   const { products } = useProductCatalog();
   const product = findProduct(params.slug, products);
   const { addProduct } = useCart();
@@ -81,10 +84,11 @@ export default function ProductScreen() {
           <Text style={styles.breadcrumbSep}>›</Text>
           <Text style={styles.breadcrumbText}>{product.name}</Text>
         </View>
-        <View style={styles.gallery}>
+        <View style={[styles.productLayout, isDesktop && styles.productLayoutDesktop]}>
+        <View style={[styles.gallery, isDesktop && styles.galleryDesktop]}>
           <Image
-            source={require("../../assets/images/product-main.png")}
-            style={styles.mainImage}
+            source={product.image}
+            style={[styles.mainImage, isDesktop && styles.mainImageDesktop]}
             resizeMode="contain"
           />
           <View style={styles.thumbs}>
@@ -105,9 +109,9 @@ export default function ProductScreen() {
             />
           </View>
         </View>
-        <View style={styles.info}>
+        <View style={[styles.info, isDesktop && styles.infoDesktop]}>
           <Text style={styles.eyebrow}>PRODUTO PERSONALIZADO</Text>
-          <Text style={styles.title}>{product.name}</Text>
+          <Text style={[styles.title, isDesktop && styles.titleDesktop]}>{product.name}</Text>
           <View style={styles.rating}>
             <Text style={styles.stars}>★★★★★</Text>
             <Text style={styles.ratingText}> 4,9 (256 avaliações)</Text>
@@ -205,13 +209,14 @@ export default function ProductScreen() {
             <Text style={styles.addText}>Adicionar ao carrinho</Text>
           </Pressable>
         </View>
-        <View style={styles.benefits}>
+        </View>
+        <View style={[styles.benefits, isDesktop && styles.benefitsDesktop]}>
           <Benefit icon="shield-checkmark-outline" title="Materiais premium" />
           <Benefit icon="ribbon-outline" title="Impressão de alta definição" />
           <Benefit icon="headset-outline" title="Atendimento especializado" />
           <Benefit icon="lock-closed-outline" title="Compra 100% segura" />
         </View>
-        <View style={styles.related}>
+        <View style={[styles.related, isDesktop && styles.relatedDesktop]}>
           <Text style={styles.relatedTitle}>Você também pode gostar</Text>
           <ScrollView
             horizontal
@@ -219,7 +224,7 @@ export default function ProductScreen() {
             contentContainerStyle={styles.relatedScroll}
           >
             {products.slice(1, 5).map((item) => (
-              <View key={item.id} style={styles.relatedCard}>
+              <View key={item.id} style={[styles.relatedCard, isDesktop && styles.relatedCardDesktop]}>
                 <ProductCard product={item} />
               </View>
             ))}
@@ -246,16 +251,19 @@ function Benefit({
 }
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.white },
-  content: { paddingBottom: 34 },
+  content: { width: "100%", maxWidth: layout.maxWidth, alignSelf: "center", paddingBottom: 48 },
   breadcrumb: {
     flexDirection: "row",
     gap: 8,
-    padding: spacing.md,
+    paddingHorizontal: spacing.lg,
+    paddingTop: 18,
     paddingBottom: 10,
   },
   breadcrumbBlue: { color: colors.blue, fontSize: 12, fontWeight: "700" },
   breadcrumbSep: { color: colors.muted },
   breadcrumbText: { color: colors.text, fontSize: 12, flex: 1 },
+  productLayout: { width: "100%" },
+  productLayoutDesktop: { flexDirection: "row", alignItems: "flex-start", paddingHorizontal: spacing.lg, gap: spacing.xl },
   gallery: {
     marginHorizontal: spacing.md,
     backgroundColor: "#FCFCFD",
@@ -264,7 +272,9 @@ const styles = StyleSheet.create({
     borderColor: colors.line,
     padding: 8,
   },
+  galleryDesktop: { flex: 1, marginHorizontal: 0, padding: spacing.md, borderRadius: 16 },
   mainImage: { width: "100%", height: 275 },
+  mainImageDesktop: { height: 520 },
   thumbs: { flexDirection: "row", gap: 8 },
   thumb: {
     width: 59,
@@ -275,6 +285,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.white,
   },
   info: { padding: spacing.md, paddingTop: 22 },
+  infoDesktop: { width: 440, padding: 0, paddingTop: 4 },
   eyebrow: {
     color: colors.blue,
     fontWeight: "900",
@@ -288,6 +299,7 @@ const styles = StyleSheet.create({
     fontWeight: "900",
     marginTop: 8,
   },
+  titleDesktop: { fontSize: 36, lineHeight: 42 },
   rating: { flexDirection: "row", alignItems: "center", marginTop: 8 },
   stars: { color: colors.yellow, fontSize: 16, letterSpacing: 1 },
   ratingText: { color: colors.text, fontSize: 11 },
@@ -404,9 +416,11 @@ const styles = StyleSheet.create({
     borderRadius: 9,
     gap: 14,
   },
+  benefitsDesktop: { marginHorizontal: spacing.lg, marginTop: spacing.xl, padding: spacing.lg, flexDirection: "row", justifyContent: "space-between" },
   benefit: { flexDirection: "row", alignItems: "center", gap: 11 },
   benefitTitle: { color: colors.ink, fontSize: 12, fontWeight: "800" },
   related: { padding: spacing.md, paddingTop: 24 },
+  relatedDesktop: { paddingHorizontal: spacing.lg, paddingTop: 40 },
   relatedTitle: {
     color: colors.ink,
     fontSize: 19,
@@ -415,4 +429,5 @@ const styles = StyleSheet.create({
   },
   relatedScroll: { gap: 12 },
   relatedCard: { width: 260 },
+  relatedCardDesktop: { width: 275 },
 });

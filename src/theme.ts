@@ -18,5 +18,13 @@ export const spacing = {
   sm: 10,
   md: 16,
   lg: 24,
-  xl: 32
+  xl: 32,
+  xxl: 48
+};
+
+export const layout = {
+  maxWidth: 1200,
+  readingWidth: 720,
+  desktopBreakpoint: 1024,
+  tabletBreakpoint: 700,
 };

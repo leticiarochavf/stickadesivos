@@ -124,7 +124,7 @@ export default function ServicesScreen() {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.white },
-  content: { padding: spacing.md, paddingBottom: 48, gap: spacing.md },
+  content: { width: '100%', maxWidth: 900, alignSelf: 'center', padding: spacing.md, paddingBottom: 48, gap: spacing.md },
   paraQuem: {
     alignSelf: 'flex-start',
     color: colors.blue,

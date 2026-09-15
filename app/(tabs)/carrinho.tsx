@@ -7,16 +7,19 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  useWindowDimensions,
   View,
 } from "react-native";
 import { SiteHeader } from "../../src/components/SiteHeader";
 import { formatBRL } from "../../src/components/ProductCard";
 import { useCart } from "../../src/context/CartContext";
 import { irParaCheckout } from "../../src/integrations/nuvemshopCheckout";
-import { colors, spacing } from "../../src/theme";
+import { colors, layout, spacing } from "../../src/theme";
 
 export default function CartScreen() {
   const router = useRouter();
+  const { width } = useWindowDimensions();
+  const isDesktop = width >= layout.desktopBreakpoint;
   const { items, total, updateQty, removeItem } = useCart();
   const [erro, setErro] = React.useState("");
 
@@ -44,7 +47,7 @@ export default function CartScreen() {
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
-        <Text style={styles.title}>
+        <Text style={[styles.title, isDesktop && styles.titleDesktop]}>
           Meu <Text style={styles.pink}>carrinho</Text>
         </Text>
         {!items.length ? (
@@ -62,8 +65,8 @@ export default function CartScreen() {
             </Pressable>
           </View>
         ) : (
-          <>
-            <View style={styles.items}>
+          <View style={[styles.cartLayout, isDesktop && styles.cartLayoutDesktop]}>
+            <View style={[styles.items, isDesktop && styles.itemsDesktop]}>
               {items.map((item) => (
                 <View key={item.key} style={styles.item}>
                   <Image
@@ -108,7 +111,7 @@ export default function CartScreen() {
                 </View>
               ))}
             </View>
-            <View style={styles.summary}>
+            <View style={[styles.summary, isDesktop && styles.summaryDesktop]}>
               <Text style={styles.summaryTitle}>Resumo do pedido</Text>
               <View style={styles.line}>
                 <Text style={styles.label}>Subtotal</Text>
@@ -136,7 +139,7 @@ export default function CartScreen() {
                 boleto ou cartão. Seus itens vão junto.
               </Text>
             </View>
-          </>
+          </View>
         )}
       </ScrollView>
     </View>
@@ -161,13 +164,14 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   screen: { flex: 1, backgroundColor: colors.white },
-  content: { padding: spacing.md, paddingBottom: 34 },
+  content: { width: "100%", maxWidth: layout.maxWidth, alignSelf: "center", padding: spacing.md, paddingBottom: 48 },
   title: {
     color: colors.ink,
     fontSize: 28,
     fontWeight: "900",
     marginBottom: 18,
   },
+  titleDesktop: { fontSize: 36, marginTop: spacing.md, marginBottom: spacing.lg },
   pink: { color: colors.pink },
   empty: {
     backgroundColor: colors.soft,
@@ -188,6 +192,9 @@ const styles = StyleSheet.create({
     marginBottom: 18,
   },
   items: { gap: 10 },
+  itemsDesktop: { flex: 1 },
+  cartLayout: { width: "100%" },
+  cartLayoutDesktop: { flexDirection: "row", alignItems: "flex-start", gap: spacing.xl },
   item: {
     minHeight: 130,
     borderWidth: 1,
@@ -247,6 +254,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.blueSoft,
     borderRadius: 10,
   },
+  summaryDesktop: { width: 380, marginTop: 0 },
   summaryTitle: {
     color: colors.ink,
     fontSize: 17,

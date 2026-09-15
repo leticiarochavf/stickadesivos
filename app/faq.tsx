@@ -8,7 +8,7 @@ import {
   PageIntro,
   Paragraph
 } from '../src/components/PageBlocks';
-import { colors, spacing } from '../src/theme';
+import { colors, layout, spacing } from '../src/theme';
 
 /*
  * Dúvidas frequentes.
@@ -137,6 +137,6 @@ export default function FaqScreen() {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.white },
-  content: { padding: spacing.md, paddingBottom: 48 },
+  content: { width: '100%', maxWidth: layout.readingWidth, alignSelf: 'center', padding: spacing.md, paddingBottom: 48 },
   nota: { color: colors.muted, fontSize: 12, lineHeight: 18, marginTop: 8 }
 });
