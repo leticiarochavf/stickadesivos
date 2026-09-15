@@ -20,6 +20,28 @@ function plainText(value) {
     .trim();
 }
 
+
+/*
+ * A loja publica alguns produtos com endereço gerado
+ * automaticamente, do tipo "produto-teste-1-1b2dg", porque o
+ * campo "URL do produto" está vazio no painel. Esse texto viraria
+ * a URL da página no site. Enquanto o painel não for preenchido,
+ * montamos um endereço a partir do nome.
+ */
+function enderecoLegivel(handle, name, productId) {
+  const automatico = !handle || /^produto-teste|^produto-\d+$/i.test(handle);
+  if (!automatico) return handle;
+
+  const base = String(name || "")
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+
+  return base || `produto-${productId}`;
+}
+
 function publicProduct(product, index) {
   const sourceVariants = Array.isArray(product.variants)
     ? product.variants
@@ -32,6 +54,8 @@ function publicProduct(product, index) {
         ? variant.values.map(localized).filter(Boolean).join(" / ")
         : "";
       const price = Number(variant?.promotional_price || variant?.price || 0);
+      if (!Number.isFinite(price) || price <= 0) return null;
+
       return {
         id,
         label:
@@ -56,7 +80,7 @@ function publicProduct(product, index) {
       ? product.images[0].src
       : undefined;
   const name = localized(product.name) || `Produto ${index + 1}`;
-  const slug = localized(product.handle) || `produto-${productId}`;
+  const slug = enderecoLegivel(localized(product.handle), name, productId);
 
   return {
     id: productId,
