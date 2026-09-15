@@ -7,8 +7,18 @@ import { useProductCatalog } from '../../src/context/ProductCatalogContext';
 import { colors, spacing } from '../../src/theme';
 import { SiteHeader } from '../../src/components/SiteHeader';
 
-const categoryOptions = ['Todos', 'Adesivos', 'Lacres', 'Etiquetas'];
-const materialOptions = ['Todos', 'Vinil Brilho', 'Vinil Fosco', 'Transparente', 'Holográfico', 'Kraft', 'Void'];
+/*
+ * As opções de filtro saem do próprio catálogo, e não de uma lista
+ * fixa. Com o catálogo vindo da loja pela API, uma lista fixa
+ * mostraria filtros que não têm produto e esconderia categorias
+ * que existem.
+ */
+function opcoesDe(produtos: { [k: string]: any }[], campo: string) {
+  const valores = produtos
+    .map((produto) => String(produto[campo] || '').trim())
+    .filter(Boolean);
+  return ['Todos', ...Array.from(new Set(valores)).sort((a, b) => a.localeCompare(b, 'pt-BR'))];
+}
 
 export default function CatalogScreen() {
   const params = useLocalSearchParams<{ categoria?: string; busca?: string }>();
@@ -18,6 +28,8 @@ export default function CatalogScreen() {
   const [material, setMaterial] = useState('Todos');
   const [term, setTerm] = useState(params.busca || '');
   const [sort, setSort] = useState<'featured' | 'asc' | 'desc'>('featured');
+  const categoryOptions = useMemo(() => opcoesDe(products, 'category'), [products]);
+  const materialOptions = useMemo(() => opcoesDe(products, 'material'), [products]);
   const filtered = useMemo(() => {
     const normalized = term.toLowerCase().trim();
     const result = products.filter((product) => (category === 'Todos' || product.category === category) && (material === 'Todos' || product.material === material) && (!normalized || `${product.name} ${product.format} ${product.material}`.toLowerCase().includes(normalized)));
@@ -28,7 +40,7 @@ export default function CatalogScreen() {
     <View style={styles.catalogHero}><View style={{ flex: 1 }}><Text style={styles.heroTitle}>Adesivos <Text style={styles.blue}>personalizados</Text></Text><Text style={styles.heroText}>Encontre o formato e o material ideais para sua marca, embalagem ou produto.</Text><View style={styles.heroTags}><Text style={styles.heroTag}>Vários formatos</Text><Text style={styles.heroTag}>Materiais selecionados</Text></View></View><Image source={require('../../assets/images/hero-products.png')} style={styles.heroImage} resizeMode="contain" /></View>
     <View style={styles.filtersHeader}><Text style={styles.resultCount}>{filtered.length} produtos encontrados</Text><Pressable style={styles.sortButton} onPress={() => setSort(sort === 'featured' ? 'asc' : sort === 'asc' ? 'desc' : 'featured')}><Ionicons name="swap-vertical-outline" size={16} color={colors.blue} /><Text style={styles.sortText}>{sort === 'featured' ? 'Destaques' : sort === 'asc' ? 'Menor preço' : 'Maior preço'}</Text></Pressable></View>
     <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chips}><Text style={styles.filterCaption}>Categorias</Text>{categoryOptions.map((option) => <Pressable key={option} onPress={() => setCategory(option)} style={[styles.chip, category === option && styles.chipActive]}><Text style={[styles.chipText, category === option && styles.chipTextActive]}>{option}</Text></Pressable>)}</ScrollView>
-    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chips}><Text style={styles.filterCaption}>Material</Text>{materialOptions.map((option) => <Pressable key={option} onPress={() => setMaterial(option)} style={[styles.chip, material === option && styles.chipActive]}><Text style={[styles.chipText, material === option && styles.chipTextActive]}>{option}</Text></Pressable>)}</ScrollView>
+    {materialOptions.length > 2 ? <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chips}><Text style={styles.filterCaption}>Material</Text>{materialOptions.map((option) => <Pressable key={option} onPress={() => setMaterial(option)} style={[styles.chip, material === option && styles.chipActive]}><Text style={[styles.chipText, material === option && styles.chipTextActive]}>{option}</Text></Pressable>)}</ScrollView> : null}
     <TextInput value={term} onChangeText={setTerm} placeholder="Buscar no catálogo" placeholderTextColor={colors.muted} style={styles.catalogSearch} />
     {filtered.length ? <View style={styles.grid}>{filtered.map((product) => <View key={product.id} style={styles.gridItem}><ProductCard product={product} /></View>)}</View> : <View style={styles.empty}><Ionicons name="search-outline" size={38} color={colors.muted} /><Text style={styles.emptyTitle}>Nenhum produto encontrado</Text><Text style={styles.emptyText}>Remova alguns filtros ou faça uma nova busca.</Text></View>}
   </ScrollView></View>;
