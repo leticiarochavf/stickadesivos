@@ -1,4 +1,5 @@
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync, statSync } from 'node:fs';
+import { extname, join } from 'node:path';
 import http from 'node:http';
 import { resolve } from 'node:path';
 import { lerCredenciaisApp, paginaResultado, trocarCodePorToken } from '../api/_oauth.mjs';
@@ -109,6 +110,62 @@ function publicProduct(product, index) {
   };
 }
 
+
+/*
+ * Além da API, este servidor entrega o site já construído, para o
+ * desenvolvimento ficar igual à produção: tudo em uma porta só,
+ * em http://localhost:3000, sem app e sem segunda porta.
+ *
+ * Gere o site antes com: npm run build:vercel
+ * As rotas que não são arquivo caem no index.html, porque a
+ * navegação acontece no navegador.
+ */
+const TIPOS = {
+  '.html': 'text/html; charset=utf-8',
+  '.js': 'text/javascript; charset=utf-8',
+  '.mjs': 'text/javascript; charset=utf-8',
+  '.css': 'text/css; charset=utf-8',
+  '.json': 'application/json; charset=utf-8',
+  '.png': 'image/png',
+  '.jpg': 'image/jpeg',
+  '.jpeg': 'image/jpeg',
+  '.webp': 'image/webp',
+  '.svg': 'image/svg+xml',
+  '.ico': 'image/x-icon',
+  '.ttf': 'font/ttf',
+  '.woff2': 'font/woff2'
+};
+
+const PASTA_SITE = resolve(process.cwd(), 'dist');
+
+function servirArquivo(res, caminho) {
+  const dados = readFileSync(caminho);
+  res.writeHead(200, {
+    'Content-Type': TIPOS[extname(caminho)] || 'application/octet-stream'
+  });
+  res.end(dados);
+}
+
+function servirSite(res, pathname) {
+  if (!existsSync(PASTA_SITE)) {
+    res.writeHead(404, { 'Content-Type': 'text/html; charset=utf-8' });
+    return res.end(
+      '<h1>Site ainda não foi gerado</h1>' +
+      '<p>Rode <code>npm run build:vercel</code> e recarregue esta página.</p>' +
+      '<p>A API já está respondendo em <code>/api/health</code>.</p>'
+    );
+  }
+
+  const pedido = join(PASTA_SITE, decodeURIComponent(pathname));
+
+  /* não deixa sair da pasta do site */
+  if (pedido.startsWith(PASTA_SITE) && existsSync(pedido) && statSync(pedido).isFile()) {
+    return servirArquivo(res, pedido);
+  }
+
+  return servirArquivo(res, join(PASTA_SITE, 'index.html'));
+}
+
 function sendJSON(res, status, body) {
   res.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8' });
   res.end(JSON.stringify(body));
@@ -171,7 +228,11 @@ const server = http.createServer(async (req, res) => {
     return res.end(paginaResultado(resultado, ambienteLocal));
   }
 
-  return sendJSON(res, 404, { error: 'Rota não encontrada' });
+  if (url.pathname.startsWith('/api/')) {
+    return sendJSON(res, 404, { error: 'Rota não encontrada' });
+  }
+
+  return servirSite(res, url.pathname);
 });
 
 server.listen(port, () => console.log(`Stick Adesivos API disponível na porta ${port}`));

@@ -11,7 +11,8 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "build:vercel": "node scripts/build-vercel.mjs",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "site": "npm run build:vercel && node scripts/local-server.mjs"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.2",
