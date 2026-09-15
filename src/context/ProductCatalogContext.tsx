@@ -42,11 +42,24 @@ export function ProductCatalogProvider({
 
   useEffect(() => {
     const configuredURL = process.env.EXPO_PUBLIC_API_URL?.replace(/\/$/, "");
-    const baseURL =
-      configuredURL ||
-      (Platform.OS === "web" && typeof window !== "undefined"
+
+    /*
+     * Endereço de desenvolvimento não pode valer no site publicado:
+     * o navegador do visitante tentaria buscar o catálogo na
+     * máquina dele. Na web, quando o site não está em localhost,
+     * o endereço da própria página é sempre a resposta certa.
+     */
+    const naWeb = Platform.OS === "web" && typeof window !== "undefined";
+    const rodandoLocal = naWeb && /localhost|127\.0\.0\.1/.test(window.location.hostname);
+    const configuradoLocal = /localhost|127\.0\.0\.1/.test(configuredURL || "");
+    const configuradoServe = configuredURL && (!configuradoLocal || rodandoLocal);
+
+    const baseURL = configuradoServe
+      ? configuredURL
+      : naWeb
         ? window.location.origin
-        : "");
+        : "";
+
     if (!baseURL) return;
 
     const controller = new AbortController();
